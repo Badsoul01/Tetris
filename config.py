@@ -10,9 +10,11 @@ SETTINGS_MENU = ["BARVY", "DUCH KOSTKY","POČÁTEČNÍ LEVEL", "ZPĚT"]
 
 TUTORIAL_TEXT = [
     "OVLÁDÁNÍ:",
+    "",
     "Šipky / WASD  -> Pohyb a rotace",
     "Mezerník      -> Hard Drop",
     "P             -> Pauza",
+    "Q             -> QUIT",
     "",
     "ZPĚT"
 ]
@@ -26,8 +28,8 @@ ACTION_KEYS ={
                 "QUIT":[ord("q"), ord("Q")],
                 "ENTER":[ord(" "),10],
                 "PAUSE":[ord("p"), ord("P")]
+}
 
-            }
 
 SHAPES = {
     'O': [(0, 0), (1, 0), (0, 1), (1, 1)],
