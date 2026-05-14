@@ -11,7 +11,6 @@ class GameMenu:
         self.index_menu = 0
         self.menu_history = []
         self.current_screen = self.main_menu
-        self.curses_colors = CURSES_COLORS
         self.settings = {"colors": True,
                          "ghost_brick": False,
                          "starting_level": 1
@@ -72,13 +71,6 @@ class GameMenu:
                 stdscr.addstr(start_y + i, start_x, final_text, style)
 
     def menu_loop(self,stdscr):
-        curses.curs_set(0)
-        curses.start_color()
-        stdscr.keypad(True)
-
-        for i, color in enumerate(self.curses_colors,1):
-            curses.init_pair(i,color,curses.COLOR_BLACK)
-
         while True:
             self.display_menu(stdscr)
             key = stdscr.getch()
@@ -126,6 +118,3 @@ class GameMenu:
             elif self.current_screen[self.index_menu] == "ZPĚT" and key in ACTION_KEYS["ENTER"]:
                 self.current_screen, self.index_menu = self.menu_history.pop()
 
-hra = GameMenu()
-if __name__ == "__main__":
-    curses.wrapper(hra.menu_loop)
