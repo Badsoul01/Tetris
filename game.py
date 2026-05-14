@@ -217,7 +217,7 @@ class Game:
                     self.move_down()
 
                 elif key in ACTION_KEYS["QUIT"]:
-                    break
+                    return "Gamestop"
 
 
                 if current_time - last_fall_time >fall_speed:
@@ -228,14 +228,16 @@ class Game:
                     self.pause = False
                     last_fall_time = current_time
                 elif key in ACTION_KEYS["QUIT"]:
-                    break
+                    return "Gamestop"
 
 
-        stdscr.erase()
-        stdscr.addstr(self.coord_y //2,0, "GAME OVER!")
-        stdscr.addstr((self.coord_y//2)+1,0,f"Tvé skore: {self.score}")
-        stdscr.nodelay(False)
-        stdscr.getch()
+            return "Gamestop"
+
+        # stdscr.erase()
+        # stdscr.addstr(self.coord_y //2,0, "GAME OVER!")
+        # stdscr.addstr((self.coord_y//2)+1,0,f"Tvé skore: {self.score}")
+        # stdscr.nodelay(False)
+        # stdscr.getch()
 
 
 hra = Game()
