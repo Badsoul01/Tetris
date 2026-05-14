@@ -230,14 +230,14 @@ class Game:
                 elif key in ACTION_KEYS["QUIT"]:
                     return "Gamestop"
 
-
+        stdscr.erase()
+        stdscr.addstr(self.coord_y //2,0, "GAME OVER!")
+        stdscr.addstr((self.coord_y//2)+1,0,f"Tvé skore: {self.score}")
+        stdscr.nodelay(False)
+        stdscr.getch()
         return "Gamestop"
 
-        # stdscr.erase()
-        # stdscr.addstr(self.coord_y //2,0, "GAME OVER!")
-        # stdscr.addstr((self.coord_y//2)+1,0,f"Tvé skore: {self.score}")
-        # stdscr.nodelay(False)
-        # stdscr.getch()
+
 
 
 hra = Game()
