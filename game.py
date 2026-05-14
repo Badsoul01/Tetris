@@ -231,7 +231,7 @@ class Game:
                     return "Gamestop"
 
 
-            return "Gamestop"
+        return "Gamestop"
 
         # stdscr.erase()
         # stdscr.addstr(self.coord_y //2,0, "GAME OVER!")
