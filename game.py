@@ -19,6 +19,7 @@ class Game:
         self.pause = False
         self._starting_level = 1
         self.color_scheme = True
+        self.ghost_brick = False
 
         for x in range(self.coord_x):
             for y in range(self._coord_y):
@@ -110,11 +111,11 @@ class Game:
                         color_id = COLOR_MAP[symbol]
                         color_block = curses.color_pair(color_id)
                     else:
-                        color_block = curses.color_pair(4)
+                        color_block = curses.color_pair(4) | curses.A_DIM
                 # herní oblast
                 elif symbol in ["║", "╚", "╝", "═"]:
-                    color_block = curses.color_pair(4) | curses.A_DIM
 
+                    color_block = curses.color_pair(4) | curses.A_BOLD
 
                 stdscr.addstr(y, x, symbol, color_block)
         stdscr.refresh()
