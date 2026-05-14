@@ -27,7 +27,8 @@ ACTION_KEYS ={
                 "RIGHT":[ord("d"), ord("D"), curses.KEY_RIGHT],
                 "QUIT":[ord("q"), ord("Q")],
                 "ENTER":[ord(" "),10],
-                "PAUSE":[ord("p"), ord("P")]
+                "PAUSE":[ord("p"), ord("P")],
+                "DROP": ord(" ")
 }
 
 
