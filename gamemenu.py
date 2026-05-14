@@ -97,7 +97,9 @@ class GameMenu:
 
 
             #potvrzování menu
-            if self.current_screen[self.index_menu] == "TUTORIÁL" and key in ACTION_KEYS["ENTER"]:
+            if self.current_screen[self.index_menu] == "NOVÁ HRA" and key in ACTION_KEYS["ENTER"]:
+                return "MenuStop"
+            elif self.current_screen[self.index_menu] == "TUTORIÁL" and key in ACTION_KEYS["ENTER"]:
                 self.menu_history.append((self.current_screen, self.index_menu))
                 self.index_menu = len(self.tutorial)-1
                 self.current_screen = self.tutorial
