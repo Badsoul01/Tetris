@@ -1,10 +1,9 @@
 import curses
-from game import Game
 from config import COLOR_MAP, LOGO_DATA, MAIN_MENU, SETTINGS_MENU, TUTORIAL_TEXT,CURSES_COLORS,ACTION_KEYS
 
 class GameMenu:
 
-    def __init__(self, game):
+    def __init__(self):
         self.main_menu = MAIN_MENU
         self.tutorial = TUTORIAL_TEXT
         self.settings_menu = SETTINGS_MENU
@@ -15,7 +14,7 @@ class GameMenu:
         self.curses_colors = CURSES_COLORS
         self.settings = {"colors": True,
                          "ghost_brick": False,
-                         "starting_level": game.level
+                         "starting_level": 1
                          }
 
     def display_menu(self, stdscr):
@@ -126,7 +125,7 @@ class GameMenu:
 
             elif self.current_screen[self.index_menu] == "ZPĚT" and key in ACTION_KEYS["ENTER"]:
                 self.current_screen, self.index_menu = self.menu_history.pop()
-test_menu = Game()
-hra = GameMenu(test_menu)
+
+hra = GameMenu()
 if __name__ == "__main__":
     curses.wrapper(hra.menu_loop)
