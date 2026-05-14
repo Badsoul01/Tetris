@@ -34,6 +34,9 @@ class GameManager:
                     stdscr.clear()
                     self.tetris = Game()
                     self.tetris._starting_level = self.menu.settings["starting_level"]
+                    self.tetris.color_scheme = self.menu.settings["colors"]
+                    self.tetris.ghost_brick = self.menu.settings["ghost_brick"]
+
                     action = self.tetris.game_loop(stdscr)
                     if action == "Game Stop":
                         self.state = "MENU"
