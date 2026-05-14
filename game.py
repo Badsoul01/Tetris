@@ -16,7 +16,6 @@ class Game:
         self.game_over = False
         self.score = 0
         self.lines = 0
-        self.curses_colors = CURSES_COLORS
         self.pause = False
         self._starting_level = 1
 
@@ -187,17 +186,8 @@ class Game:
 
 
     def game_loop(self,stdscr):
-        curses.curs_set(0)
-        curses.start_color()
-        stdscr.keypad(True)
-
-        for i, color in enumerate(self.curses_colors,1):
-            curses.init_pair(i,color,curses.COLOR_BLACK)
-
         stdscr.nodelay(True)
-
         last_fall_time = time.time()
-
         while not self.game_over:
             self.display(stdscr)
             key = stdscr.getch()
