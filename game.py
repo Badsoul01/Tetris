@@ -1,6 +1,6 @@
 import curses
 import time
-from config import COLOR_MAP,CURSES_COLORS, ACTION_KEYS
+from config import COLOR_MAP, ACTION_KEYS
 from block import Tetromino
 
 
@@ -18,7 +18,7 @@ class Game:
         self.lines = 0
         self.pause = False
         self._starting_level = 1
-
+        self.color_scheme = True
 
         for x in range(self.coord_x):
             for y in range(self._coord_y):
@@ -46,49 +46,77 @@ class Game:
     def level(self):
         return self._starting_level + (self.lines//10)
 
+
+    def display_text(self,stdscr):
+        text_color = curses.color_pair(4) | curses.A_DIM
+        if not self.game_over:
+            stdscr.addstr(15, 20, f"Skóre: {self.score}", text_color)
+            stdscr.addstr(16, 20, f"Počet smazaných řad: {self.lines}",text_color)
+            stdscr.addstr(17, 20, f"Aktualní úroveň: {self.level}",text_color)
+            if self.pause:
+                stdscr.addstr(self.coord_y // 2, 20, "PAUZA!",text_color)
+                stdscr.addstr((self.coord_y // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
+
+    def display_game_over(self,stdscr):
+        text_color = curses.color_pair(4)
+        if self.game_over:
+            stdscr.erase()
+            stdscr.addstr(self.coord_y // 2, 0, "GAME OVER!", text_color)
+            stdscr.addstr((self.coord_y // 2) + 1, 0, f"Tvé skore: {self.score}",text_color)
+            stdscr.nodelay(False)
+            stdscr.getch()
+
+
+    def display_next_block(self,stdscr):
+        text_color = curses.color_pair(4) | curses.A_DIM
+        passive_coords = self.next_block.relative_blocks
+        display_coords = []
+        stdscr.addstr(0, 20, "Následující kostka:",text_color)
+        for x, y in passive_coords:
+            display_coords.append((x + 29, y + 3))
+
+        for x, y in display_coords:
+            symbol = self.next_block.name
+            if self.color_scheme:
+                block_color = curses.color_pair(self.next_block.color_id)
+            else:
+                block_color = curses.color_pair(4)
+
+            stdscr.addstr(y,x,symbol,block_color)
+
+
     def display(self,stdscr):
         stdscr.erase()
         active_coords = self.falling_block.get_world_coordinates()
-        passive_coords = self.next_block.relative_blocks
 
-        display_coords = []
-        for x,y in passive_coords:
-            display_coords.append((x+29,y+3))
-
-        stdscr.addstr(0,20, "Následující kostka:")
-
-        stdscr.addstr(15,20,f"Skóre: {self.score}")
-        stdscr.addstr(16,20,f"Počet smazaných řádek: {self.lines}")
-        stdscr.addstr(17,20,f"Aktualní úrověň: {self.level}")
-        if self.pause:
-            stdscr.addstr(self.coord_y // 2, 20, "PAUZA!")
-            stdscr.addstr((self.coord_y // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!")
-        for x,y in display_coords:
-            symbol = self.next_block.name
-            color = curses.color_pair(self.next_block.color_id)
-
-            stdscr.addstr(y,x, symbol, color)
+        self.display_text(stdscr)
+        self.display_next_block(stdscr)
 
         for y in range(self.coord_y):
             for  x in range(self.coord_x):
                 symbol = self.grid[x, y]
-                color = 4
 
                 #Aktivní kostka
                 if (x,y) in active_coords:
                     symbol = self.falling_block.name
-                    color = curses.color_pair(self.falling_block.color_id)
+                    if self.color_scheme:
+                        color_block = curses.color_pair(self.falling_block.color_id)
+                    else:
+                        color_block = curses.color_pair(4) | curses.A_BOLD
 
-                #pasivní kostka v gridu
+                # pasivní kostka v gridu
                 elif symbol in COLOR_MAP:
-                    color_id = COLOR_MAP[symbol]
-                    color = curses.color_pair(color_id)
+                    if self.color_scheme:
+                        color_id = COLOR_MAP[symbol]
+                        color_block = curses.color_pair(color_id)
+                    else:
+                        color_block = curses.color_pair(4)
+                # herní oblast
+                elif symbol in ["║", "╚", "╝", "═"]:
+                    color_block = curses.color_pair(4) | curses.A_DIM
 
-                #herní oblast
-                elif symbol in ["║","╚","╝", "═"]:
-                    color = curses.color_pair(4) | curses.A_DIM
 
-                stdscr.addstr(y, x, symbol, color)
+                stdscr.addstr(y, x, symbol, color_block)
         stdscr.refresh()
 
     def is_free(self,coords):
@@ -220,9 +248,5 @@ class Game:
                 elif key in ACTION_KEYS["QUIT"]:
                     self.game_over = True
 
-        stdscr.erase()
-        stdscr.addstr(self.coord_y //2,0, "GAME OVER!")
-        stdscr.addstr((self.coord_y//2)+1,0,f"Tvé skore: {self.score}")
-        stdscr.nodelay(False)
-        stdscr.getch()
+        self.display_game_over(stdscr)
         return "Game Stop"
