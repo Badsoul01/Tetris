@@ -7,5 +7,29 @@ class GameManager:
 
 
     def __init__(self):
+        self.tetris = None
         self.menu = GameMenu()
         self.state = "MENU"
+        self.curses_colors = CURSES_COLORS
+
+
+    def run_game(self,stdscr):
+        curses.curs_set(0)
+        curses.start_color()
+        stdscr.keypad(True)
+
+        for i, color in enumerate(self.curses_colors, 1):
+            curses.init_pair(i, color, curses.COLOR_BLACK)
+
+        while not self.state != "EXIT GAME":
+            match self.state:
+                case "MENU":
+                    self.menu.display_menu(stdscr)
+                    if self.menu.display_menu(stdscr) == "MenuStop":
+                        self.state = "GAME"
+                    elif self.menu.display_menu(stdscr) == "EXIT GAME":
+                        self.state = "EXIT GAME"
+
+                case "GAME":
+                    self.tetris = Game()
+                    self.tetris.level = self.menu.settings["starting_level"]
