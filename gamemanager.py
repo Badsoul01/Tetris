@@ -24,10 +24,10 @@ class GameManager:
         while not self.state != "EXIT GAME":
             match self.state:
                 case "MENU":
-                    self.menu.display_menu(stdscr)
-                    if self.menu.display_menu(stdscr) == "Menu Stop":
+                    self.menu.menu_loop(stdscr)
+                    if self.menu.menu_loop(stdscr) == "Menu Stop":
                         self.state = "GAME"
-                    elif self.menu.display_menu(stdscr) == "EXIT GAME":
+                    elif self.menu.menu_loop(stdscr) == "EXIT GAME":
                         self.state = "EXIT GAME"
 
                 case "GAME":
