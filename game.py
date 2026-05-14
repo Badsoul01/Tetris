@@ -49,12 +49,29 @@ class Game:
 
 
     def display_text(self,stdscr):
-        text_color = curses.color_pair(4) | curses.A_DIM
+        text_color = curses.color_pair(4)
+        if self.color_scheme:
+            number_color = curses.color_pair(2) | curses.A_BOLD
+        else:
+            number_color = curses.color_pair(4) | curses.A_BOLD
+
         if not self.game_over:
-            stdscr.addstr(15, 20, f"Skóre: {self.score}", text_color)
-            stdscr.addstr(16, 20, f"Počet smazaných řad: {self.lines}",text_color)
-            stdscr.addstr(17, 20, f"Aktualní úroveň: {self.level}",text_color)
+            stdscr.addstr(15, 20, "Skóre: ", text_color)
+            stdscr.addstr(16, 20, "Počet smazaných řad: ",text_color)
+            stdscr.addstr(17, 20, "Aktualní úroveň: ",text_color)
+            len_score = len("Skóre: ")
+            len_line = len("Počet smazaných řad: ")
+            len_level= len("Aktualní úroveň: ")
+            stdscr.addstr(15,20+len_score, str(self.score),number_color)
+            stdscr.addstr(16,20+len_line, str(self.lines),number_color)
+            stdscr.addstr(17,20+len_level, str(self.level),number_color)
+
             if self.pause:
+                if self.color_scheme:
+                    text_color = curses.color_pair(5) | curses.A_BOLD
+                else:
+                    text_color = curses.color_pair(4) | curses.A_BOLD
+
                 stdscr.addstr(self.coord_y // 2, 20, "PAUZA!",text_color)
                 stdscr.addstr((self.coord_y // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
 
@@ -69,7 +86,7 @@ class Game:
 
 
     def display_next_block(self,stdscr):
-        text_color = curses.color_pair(4) | curses.A_DIM
+        text_color = curses.color_pair(4)
         passive_coords = self.next_block.relative_blocks
         display_coords = []
         stdscr.addstr(0, 20, "Následující kostka:",text_color)
@@ -79,9 +96,9 @@ class Game:
         for x, y in display_coords:
             symbol = self.next_block.name
             if self.color_scheme:
-                block_color = curses.color_pair(self.next_block.color_id)
+                block_color = curses.color_pair(self.next_block.color_id) | curses.A_BOLD
             else:
-                block_color = curses.color_pair(4)
+                block_color = curses.color_pair(4) | curses.A_BOLD
 
             stdscr.addstr(y,x,symbol,block_color)
 
