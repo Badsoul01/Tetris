@@ -25,11 +25,17 @@ class GameManager:
             match self.state:
                 case "MENU":
                     self.menu.display_menu(stdscr)
-                    if self.menu.display_menu(stdscr) == "MenuStop":
+                    if self.menu.display_menu(stdscr) == "Menu Stop":
                         self.state = "GAME"
                     elif self.menu.display_menu(stdscr) == "EXIT GAME":
                         self.state = "EXIT GAME"
 
                 case "GAME":
                     self.tetris = Game()
-                    self.tetris.level = self.menu.settings["starting_level"]
+                    self.tetris._starting_level = self.menu.settings["starting_level"]
+                    self.tetris.game_loop(stdscr)
+                    if self.tetris.game_loop(stdscr) == "Game Stop":
+                        self.state = "MENU"
+
+                case "EXIT GAME":
+                    break
