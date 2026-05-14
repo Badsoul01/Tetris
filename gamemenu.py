@@ -109,7 +109,7 @@ class GameMenu:
                 self.current_screen = self.settings_menu
 
             elif self.current_screen[self.index_menu] == "EXIT" and key in ACTION_KEYS["ENTER"]:
-                break
+                return "EXIT GAME"
 
 
             elif self.current_screen[self.index_menu] == "BARVY" and key in ACTION_KEYS["ENTER"]:
