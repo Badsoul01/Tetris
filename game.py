@@ -18,7 +18,7 @@ class Game:
         self.lines = 0
         self.curses_colors = CURSES_COLORS
         self.pause = False
-
+        self._starting_level = 1
 
 
         for x in range(self.coord_x):
@@ -45,7 +45,7 @@ class Game:
 
     @property
     def level(self):
-        return (self.lines//10)+1
+        return self._starting_level + (self.lines//10)
 
     def display(self,stdscr):
         stdscr.erase()
