@@ -21,20 +21,21 @@ class GameManager:
         for i, color in enumerate(self.curses_colors, 1):
             curses.init_pair(i, color, curses.COLOR_BLACK)
 
-        while not self.state != "EXIT GAME":
+        while self.state != "EXIT GAME":
             match self.state:
                 case "MENU":
-                    self.menu.menu_loop(stdscr)
-                    if self.menu.menu_loop(stdscr) == "Menu Stop":
+                    action = self.menu.menu_loop(stdscr)
+                    if action == "Menu Stop":
                         self.state = "GAME"
-                    elif self.menu.menu_loop(stdscr) == "EXIT GAME":
+                    elif action  == "EXIT GAME":
                         self.state = "EXIT GAME"
 
                 case "GAME":
+                    stdscr.clear()
                     self.tetris = Game()
                     self.tetris._starting_level = self.menu.settings["starting_level"]
-                    self.tetris.game_loop(stdscr)
-                    if self.tetris.game_loop(stdscr) == "Game Stop":
+                    action = self.tetris.game_loop(stdscr)
+                    if action == "Game Stop":
                         self.state = "MENU"
 
                 case "EXIT GAME":

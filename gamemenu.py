@@ -71,6 +71,8 @@ class GameMenu:
                 stdscr.addstr(start_y + i, start_x, final_text, style)
 
     def menu_loop(self,stdscr):
+        stdscr.nodelay(False)
+
         while True:
             self.display_menu(stdscr)
             key = stdscr.getch()
@@ -89,7 +91,7 @@ class GameMenu:
 
             #potvrzování menu
             if self.current_screen[self.index_menu] == "NOVÁ HRA" and key in ACTION_KEYS["ENTER"]:
-                return "MenuStop"
+                return "Menu Stop"
             elif self.current_screen[self.index_menu] == "TUTORIÁL" and key in ACTION_KEYS["ENTER"]:
                 self.menu_history.append((self.current_screen, self.index_menu))
                 self.index_menu = len(self.tutorial)-1
