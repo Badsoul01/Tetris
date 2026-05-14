@@ -78,9 +78,16 @@ class Game:
     def display_game_over(self,stdscr):
         text_color = curses.color_pair(4)
         if self.game_over:
+            if self.color_scheme:
+                number_color = curses.color_pair(2) | curses.A_BOLD
+            else:
+                number_color = curses.color_pair(4) | curses.A_BOLD
+
             stdscr.erase()
             stdscr.addstr(self.coord_y // 2, 0, "GAME OVER!", text_color)
-            stdscr.addstr((self.coord_y // 2) + 1, 0, f"Tvé skore: {self.score}",text_color)
+            stdscr.addstr((self.coord_y // 2) + 1, 0, f"Tvé skore: ",text_color)
+            len_score = len("Tvé skore: ")
+            stdscr.addstr((self.coord_y // 2) + 1, 0+len_score, str(self.score),number_color)
             stdscr.nodelay(False)
             stdscr.getch()
 
