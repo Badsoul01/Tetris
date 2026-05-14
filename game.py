@@ -113,7 +113,7 @@ class Game:
     def display(self,stdscr):
         stdscr.erase()
         active_coords = self.falling_block.get_world_coordinates()
-
+        ghost = self.ghost_brick_coords()
         self.display_text(stdscr)
         self.display_next_block(stdscr)
 
@@ -129,6 +129,15 @@ class Game:
                     else:
                         color_block = curses.color_pair(4) | curses.A_BOLD
 
+                #duch kostky
+                elif (x,y) in ghost and self.ghost_brick:
+                    symbol = self.falling_block.name
+                    if self.color_scheme:
+                        color_id = COLOR_MAP[symbol]
+                        color_block = curses.color_pair(color_id) | curses.A_DIM
+                    else:
+                        color_block = curses.color_pair(4) | curses.A_DIM
+
                 # pasivní kostka v gridu
                 elif symbol in COLOR_MAP:
                     if self.color_scheme:
@@ -138,7 +147,6 @@ class Game:
                         color_block = curses.color_pair(4) | curses.A_DIM
                 # herní oblast
                 elif symbol in ["║", "╚", "╝", "═"]:
-
                     color_block = curses.color_pair(4) | curses.A_BOLD
 
                 stdscr.addstr(y, x, symbol, color_block)
@@ -152,6 +160,29 @@ class Game:
                 return False
 
         return True
+
+    def ghost_brick_coords(self):
+        coords = self.falling_block.get_world_coordinates()
+        ghost_y = 0
+        while True:
+            ghost_coords = []
+
+            for x,y in coords:
+                ghost_coords.append((x,y+ghost_y+1))
+
+
+            if self.is_free(ghost_coords):
+                ghost_y +=1
+
+            else:
+                break
+
+        ghost_coords = []
+        for x,y in coords:
+            ghost_coords.append((x,y+ghost_y))
+
+        return ghost_coords
+
 
     def lock_piece(self):
         coordinates = self.falling_block.get_world_coordinates()
@@ -258,7 +289,8 @@ class Game:
                     self.rotate()
                 elif key in ACTION_KEYS["DOWN"] :
                     self.move_down()
-
+                elif key in ACTION_KEYS["SPACE"]:
+                    pass
                 elif key in ACTION_KEYS["QUIT"]:
                     self.game_over = True
 
