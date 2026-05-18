@@ -220,8 +220,11 @@ class Game:
         self.try_move(-1,0)
 
     def hard_drop(self):
+        line = 0
         while self.try_move(0,1):
-            pass
+            line +=1
+
+        self.score += (line*2)
         self.lock_piece()
 
     def check_lines(self):
