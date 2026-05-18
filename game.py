@@ -4,7 +4,6 @@ from config import COLOR_MAP, ACTION_KEYS
 from block import Tetromino
 
 
-
 class Game:
 
     def __init__(self):
@@ -196,26 +195,34 @@ class Game:
             self.game_over = True
 
 
+    def try_move(self,dx,dy):
+        coordinates = self.falling_block.get_world_coordinates()
+        new_coords = []
+        for x,y in coordinates:
+            new_coords.append((x+dx,y+dy))
+        if self.is_free(new_coords):
+            self.falling_block.x +=dx
+            self.falling_block.y +=dy
+            return True
+        else:
+            return False
 
     def move_down(self):
-        coordinates = self.falling_block.get_world_coordinates()
-        new_coords = [(x, y + 1) for x, y in coordinates]
-        if self.is_free(new_coords):
-            self.falling_block.y +=1
-        else:
+
+        move = self.try_move(0, 1)
+        if not move:
             self.lock_piece()
 
     def move_right(self):
-        coordinates = self.falling_block.get_world_coordinates()
-        new_coords = [(x+1,y) for x,y in coordinates ]
-        if self.is_free(new_coords):
-            self.falling_block.x +=1
+        self.try_move(1,0)
 
     def move_left(self):
-        coordinates = self.falling_block.get_world_coordinates()
-        new_coords = [(x-1,y) for x,y in coordinates]
-        if self.is_free(new_coords):
-            self.falling_block.x -= 1
+        self.try_move(-1,0)
+
+    def hard_drop(self):
+        while self.try_move(0,1):
+            pass
+        self.lock_piece()
 
     def check_lines(self):
         y= self.coord_y-2
@@ -289,8 +296,8 @@ class Game:
                     self.rotate()
                 elif key in ACTION_KEYS["DOWN"] :
                     self.move_down()
-                elif key in ACTION_KEYS["SPACE"]:
-                    pass
+                elif key in ACTION_KEYS["DROP"]:
+                    self.hard_drop()
                 elif key in ACTION_KEYS["QUIT"]:
                     self.game_over = True
 
