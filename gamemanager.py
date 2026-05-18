@@ -3,8 +3,8 @@ from gamemenu import GameMenu
 from game import Game
 from config import CURSES_COLORS
 
-class GameManager:
 
+class GameManager:
 
     def __init__(self):
         self.tetris = None

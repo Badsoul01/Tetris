@@ -1,6 +1,7 @@
 import curses
 from config import COLOR_MAP, LOGO_DATA, MAIN_MENU, SETTINGS_MENU, TUTORIAL_TEXT,CURSES_COLORS,ACTION_KEYS
 
+
 class GameMenu:
 
     def __init__(self):

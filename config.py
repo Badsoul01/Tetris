@@ -22,13 +22,13 @@ TUTORIAL_TEXT = [
 
 ACTION_KEYS ={
                 "UP" : [ord("w"), ord("W"), curses.KEY_UP],
-                "DOWN":[ord("s"), ord("S"), curses.KEY_DOWN],
-                "LEFT":[ord("a"), ord("A"), curses.KEY_LEFT],
-                "RIGHT":[ord("d"), ord("D"), curses.KEY_RIGHT],
-                "QUIT":[ord("q"), ord("Q")],
-                "ENTER":[ord(" "),10],
-                "PAUSE":[ord("p"), ord("P")],
-                "DROP": ord(" ")
+                "DOWN": [ord("s"), ord("S"), curses.KEY_DOWN],
+                "LEFT": [ord("a"), ord("A"), curses.KEY_LEFT],
+                "RIGHT": [ord("d"), ord("D"), curses.KEY_RIGHT],
+                "QUIT": [ord("q"), ord("Q")],
+                "ENTER": [ord(" "),10],
+                "PAUSE": [ord("p"), ord("P")],
+                "DROP":  [ord(" ")]
 }
 
 
