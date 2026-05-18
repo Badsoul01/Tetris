@@ -5,6 +5,7 @@ class GameScoreManager:
         self.deleted_lines = 0
         self.starting_level = starting_level
         self.level = starting_level
+        self.fall_speed = max(0.1, 0.7 - (min(self.level, 15) - 1) * 0.05)
 
     def hard_drop_score(self,lines_drop):
         self.score += lines_drop*2
@@ -23,3 +24,4 @@ class GameScoreManager:
 
         self.deleted_lines += lines_count
         self.level = self.starting_level +(self.deleted_lines//10)
+        self.fall_speed = max(0.1, 0.7 - (min(self.level, 15) - 1) * 0.05)
