@@ -9,13 +9,25 @@ MAIN_MENU = ["NOVÁ HRA","TUTORIÁL","NASTAVENÍ","STATISTIKY","EXIT"]
 SETTINGS_MENU = ["BARVY", "DUCH KOSTKY","POČÁTEČNÍ LEVEL", "ZPĚT"]
 
 TUTORIAL_TEXT = [
-    "OVLÁDÁNÍ:",
+    "OVLÁDÁNÍ HRY:",
     "",
     "Šipky / WASD  -> Pohyb a rotace",
     "Mezerník      -> Hard Drop",
     "P             -> Pauza",
-    "Q             -> QUIT",
+    "Q             -> Save & Quit",
     "",
+    "",
+    "BODOVÁNÍ",
+    "",
+    "POČET ŘAD               BODY",
+    "",
+    "Jedna         ->dosažená úroveň x 40",
+    "Dvě           ->                x 100",
+    "Tři           ->                x 300",
+    "Čtyři         ->                x 1200",
+    "",
+    "Hard drop     -> 2 body za každý řádek",
+
     "ZPĚT"
 ]
 
