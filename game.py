@@ -2,21 +2,19 @@ import curses
 import time
 from config import COLOR_MAP, ACTION_KEYS
 from block import Tetromino
-
+from gamescoremanager import GameScoreManager
 
 class Game:
 
-    def __init__(self):
+    def __init__(self,starting_level):
         self._coord_x = 16
         self._coord_y = 23
         self.grid = {}
         self.falling_block = Tetromino(self)
         self.next_block = Tetromino(self)
+        self.score_manager = GameScoreManager(starting_level)
         self.game_over = False
-        self.score = 0
-        self.lines = 0
         self.pause = False
-        self._starting_level = 1
         self.color_scheme = True
         self.ghost_brick = False
 
@@ -42,11 +40,6 @@ class Game:
     def coord_y(self):
         return self._coord_y
 
-    @property
-    def level(self):
-        return self._starting_level + (self.lines//10)
-
-
     def display_text(self,stdscr):
         text_color = curses.color_pair(4)
         if self.color_scheme:
@@ -61,9 +54,9 @@ class Game:
             len_score = len("Skóre: ")
             len_line = len("Počet smazaných řad: ")
             len_level= len("Aktualní úroveň: ")
-            stdscr.addstr(15,20+len_score, str(self.score),number_color)
-            stdscr.addstr(16,20+len_line, str(self.lines),number_color)
-            stdscr.addstr(17,20+len_level, str(self.level),number_color)
+            stdscr.addstr(15,20+len_score, str(self.score_manager.score),number_color)
+            stdscr.addstr(16,20+len_line, str(self.score_manager.deleted_lines),number_color)
+            stdscr.addstr(17,20+len_level, str(self.score_manager.level),number_color)
 
             if self.pause:
                 if self.color_scheme:
@@ -86,7 +79,7 @@ class Game:
             stdscr.addstr(self.coord_y // 2, 0, "GAME OVER!", text_color)
             stdscr.addstr((self.coord_y // 2) + 1, 0, f"Tvé skore: ",text_color)
             len_score = len("Tvé skore: ")
-            stdscr.addstr((self.coord_y // 2) + 1, 0+len_score, str(self.score),number_color)
+            stdscr.addstr((self.coord_y // 2) + 1, 0+len_score, str(self.score_manager.score),number_color)
             stdscr.nodelay(False)
             stdscr.getch()
 
@@ -220,11 +213,11 @@ class Game:
         self.try_move(-1,0)
 
     def hard_drop(self):
-        line = 0
+        lines = 0
         while self.try_move(0,1):
-            line +=1
+            lines +=1
 
-        self.score += (line*2)
+        self.score_manager.hard_drop_score(lines)
         self.lock_piece()
 
     def check_lines(self):
@@ -243,7 +236,7 @@ class Game:
                         self.grid[x,row_to_move] = self.grid[x,row_to_move -1]
 
                 lines += 1
-                self.lines += 1
+
 
 
                 for x in range(1,self.coord_x-1):
@@ -254,11 +247,7 @@ class Game:
             else:
                 y-=1
 
-        self.score += (self.level * 40) if lines == 1 else 0
-        self.score += (self.level * 100) if lines == 2 else 0
-        self.score += (self.level * 300) if lines == 3 else 0
-        self.score += (self.level * 1200) if lines == 4 else 0
-
+        self.score_manager.line_clear_score(lines)
 
     def rotate(self):
         new_coords = []
@@ -286,7 +275,7 @@ class Game:
             self.display(stdscr)
             key = stdscr.getch()
             stdscr.keypad(True)
-            fall_speed = max(0.1,0.7 -(min(self.level,15)-1)*0.05)
+            fall_speed = self.score_manager.fall_speed
             current_time = time.time()
             if not self.pause:
                 if key in ACTION_KEYS["PAUSE"]:
