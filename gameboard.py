@@ -1,8 +1,8 @@
 class GameBoard:
 
-    def __init__(self,width,height):
-        self.width = width
-        self.height = height
+    def __init__(self):
+        self.width =  16
+        self.height = 23
         self.grid = {}
 
 
