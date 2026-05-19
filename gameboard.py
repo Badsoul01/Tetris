@@ -35,5 +35,32 @@ class GameBoard:
             self.grid[x, y]= block_name
 
 
+    def check_lines(self):
+        y= self.height-2
+        lines = 0
 
+        while y>=0:
+            is_full = True
+            for x in range(1,self.width-1):
+                if self.grid[x,y] == " ":
+                    is_full = False
+                    break
+            if is_full:
+                for row_to_move in range(y,0,-1):
+                    for x in range(1,self.width-1):
+                        self.grid[x,row_to_move] = self.grid[x,row_to_move -1]
+
+                lines += 1
+
+
+
+                for x in range(1,self.width-1):
+                    self.grid[x,0] = " "
+
+
+
+            else:
+                y-=1
+
+        return lines
 
