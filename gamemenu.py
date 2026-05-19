@@ -1,4 +1,5 @@
 import curses
+import os
 from config import COLOR_MAP, LOGO_DATA, MAIN_MENU, SETTINGS_MENU, TUTORIAL_TEXT,CURSES_COLORS,ACTION_KEYS
 
 
@@ -16,6 +17,24 @@ class GameMenu:
                          "ghost_brick": False,
                          "starting_level": 1
                          }
+        self.update_main_menu()
+
+
+
+    def  update_main_menu(self):
+        is_in_main = self.current_screen == self.main_menu or "NOVÁ HRA" in self.current_screen
+
+        if os.path.exists("savegame.json"):
+            if "POKRAČOVAT" not in MAIN_MENU:
+                self.main_menu = ["POKRAČOVAT"]+ MAIN_MENU
+            else:
+                self.main_menu = MAIN_MENU
+        else:
+            self.main_menu = [item for item in MAIN_MENU if item != "POKRAČOVAT"]
+
+        if is_in_main:
+            self.current_screen = self.main_menu
+
 
     def display_menu(self, stdscr):
         stdscr.erase()
@@ -75,6 +94,10 @@ class GameMenu:
         stdscr.nodelay(False)
 
         while True:
+            self.update_main_menu()
+            if self.index_menu >=len(self.current_screen):
+                self.index_menu = 0
+
             self.display_menu(stdscr)
             key = stdscr.getch()
 
@@ -91,8 +114,10 @@ class GameMenu:
 
 
             #potvrzování menu
+            if self.current_screen[self.index_menu] == "POKRAČOVAT" and key in ACTION_KEYS["ENTER"]:
+                return "CONTINUE"
             if self.current_screen[self.index_menu] == "NOVÁ HRA" and key in ACTION_KEYS["ENTER"]:
-                return "Menu Stop"
+                return "NEW GAME"
             elif self.current_screen[self.index_menu] == "TUTORIÁL" and key in ACTION_KEYS["ENTER"]:
                 self.menu_history.append((self.current_screen, self.index_menu))
                 self.index_menu = len(self.tutorial)-1
