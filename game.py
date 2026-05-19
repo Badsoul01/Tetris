@@ -3,42 +3,20 @@ import time
 from config import COLOR_MAP, ACTION_KEYS
 from block import Tetromino
 from gamescoremanager import GameScoreManager
+from gameboard import GameBoard
+
 
 class Game:
 
     def __init__(self,starting_level):
-        self._coord_x = 16
-        self._coord_y = 23
-        self.grid = {}
+        self.board = GameBoard()
+        self.score_manager = GameScoreManager(starting_level)
         self.falling_block = Tetromino(self)
         self.next_block = Tetromino(self)
-        self.score_manager = GameScoreManager(starting_level)
         self.game_over = False
         self.pause = False
         self.color_scheme = True
         self.ghost_brick = False
-
-        for x in range(self.coord_x):
-            for y in range(self._coord_y):
-                if x== 0 and y == self.coord_y-1:
-                    self.grid[x,y]="╚"
-
-                elif x == self.coord_x-1 and y== self.coord_y-1:
-                    self.grid[x,y]= "╝"
-                elif x == 0 or x== self.coord_x-1:
-                    self.grid[x,y]="║"
-
-                elif y == self.coord_y-1:
-                    self.grid[x,y] = "═"
-                else:
-                    self.grid[x,y] = " "
-
-    @property
-    def coord_x(self):
-        return self._coord_x
-    @property
-    def coord_y(self):
-        return self._coord_y
 
     def display_text(self,stdscr):
         text_color = curses.color_pair(4)
@@ -64,8 +42,8 @@ class Game:
                 else:
                     text_color = curses.color_pair(4) | curses.A_BOLD
 
-                stdscr.addstr(self.coord_y // 2, 20, "PAUZA!",text_color)
-                stdscr.addstr((self.coord_y // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
+                stdscr.addstr(self.board.height // 2, 20, "PAUZA!",text_color)
+                stdscr.addstr((self.board.height // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
 
     def display_game_over(self,stdscr):
         text_color = curses.color_pair(4)
@@ -76,10 +54,10 @@ class Game:
                 number_color = curses.color_pair(4) | curses.A_BOLD
 
             stdscr.erase()
-            stdscr.addstr(self.coord_y // 2, 0, "GAME OVER!", text_color)
-            stdscr.addstr((self.coord_y // 2) + 1, 0, f"Tvé skore: ",text_color)
+            stdscr.addstr(self.board.height // 2, 0, "GAME OVER!", text_color)
+            stdscr.addstr((self.board.height // 2) + 1, 0, f"Tvé skore: ",text_color)
             len_score = len("Tvé skore: ")
-            stdscr.addstr((self.coord_y // 2) + 1, 0+len_score, str(self.score_manager.score),number_color)
+            stdscr.addstr((self.board.height // 2) + 1, 0+len_score, str(self.score_manager.score),number_color)
             stdscr.nodelay(False)
             stdscr.getch()
 
@@ -109,9 +87,9 @@ class Game:
         self.display_text(stdscr)
         self.display_next_block(stdscr)
 
-        for y in range(self.coord_y):
-            for  x in range(self.coord_x):
-                symbol = self.grid[x, y]
+        for y in range(self.board.height):
+            for  x in range(self.board.width):
+                symbol = self.board.grid[x, y]
 
                 #Aktivní kostka
                 if (x,y) in active_coords:
@@ -144,14 +122,6 @@ class Game:
                 stdscr.addstr(y, x, symbol, color_block)
         stdscr.refresh()
 
-    def is_free(self,coords):
-        for x,y in coords:
-            if (x, y) not in self.grid:
-                return False
-            if self.grid[x,y] != " ":
-                return False
-
-        return True
 
     def ghost_brick_coords(self):
         coords = self.falling_block.get_world_coordinates()
@@ -163,7 +133,7 @@ class Game:
                 ghost_coords.append((x,y+ghost_y+1))
 
 
-            if self.is_free(ghost_coords):
+            if self.board.is_free(ghost_coords):
                 ghost_y +=1
 
             else:
@@ -178,13 +148,17 @@ class Game:
 
     def lock_piece(self):
         coordinates = self.falling_block.get_world_coordinates()
-        for x,y in coordinates:
-            self.grid[x,y] = self.falling_block.name
+        name = self.falling_block.name
+        self.board.lock_pieces(coordinates,name)
 
-        self.check_lines()
+        cleared_lines = self.board.check_lines()
+        self.score_manager.line_clear_score(cleared_lines)
+
         self.falling_block = self.next_block
         self.next_block = Tetromino(self)
-        if not self.is_free(self.falling_block.get_world_coordinates()):
+
+        coordinates = self.falling_block.get_world_coordinates()
+        if not self.board.is_free(coordinates):
             self.game_over = True
 
 
@@ -193,7 +167,7 @@ class Game:
         new_coords = []
         for x,y in coordinates:
             new_coords.append((x+dx,y+dy))
-        if self.is_free(new_coords):
+        if self.board.is_free(new_coords):
             self.falling_block.x +=dx
             self.falling_block.y +=dy
             return True
@@ -220,35 +194,6 @@ class Game:
         self.score_manager.hard_drop_score(lines)
         self.lock_piece()
 
-    def check_lines(self):
-        y= self.coord_y-2
-        lines = 0
-
-        while y>=0:
-            is_full = True
-            for x in range(1,self.coord_x-1):
-                if self.grid[x,y] == " ":
-                    is_full = False
-                    break
-            if is_full:
-                for row_to_move in range(y,0,-1):
-                    for x in range(1,self.coord_x-1):
-                        self.grid[x,row_to_move] = self.grid[x,row_to_move -1]
-
-                lines += 1
-
-
-
-                for x in range(1,self.coord_x-1):
-                    self.grid[x,0] = " "
-
-
-
-            else:
-                y-=1
-
-        self.score_manager.line_clear_score(lines)
-
     def rotate(self):
         new_coords = []
         coords = self.falling_block.relative_blocks
@@ -264,7 +209,7 @@ class Game:
             world_coords.append((world_x,world_y))
 
 
-        if self.is_free(world_coords):
+        if self.board.is_free(world_coords):
             self.falling_block.relative_blocks = new_coords
 
 
