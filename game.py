@@ -4,19 +4,49 @@ from config import COLOR_MAP, ACTION_KEYS
 from block import Tetromino
 from gamescoremanager import GameScoreManager
 from gameboard import GameBoard
+from savemanager import SaveManager
 
 
 class Game:
 
-    def __init__(self,starting_level):
+    def __init__(self,starting_level,load_data = None):
         self.board = GameBoard()
         self.score_manager = GameScoreManager(starting_level)
-        self.falling_block = Tetromino(self)
-        self.next_block = Tetromino(self)
+        self.save_manager = SaveManager()
+
+        if load_data is None:
+            self.falling_block = Tetromino(self)
+            self.next_block = Tetromino(self)
+        else:
+            self.board.grid = load_data["grid"]
+            self.score_manager.score = load_data["score_manager"]["score"]
+            self.score_manager.level= load_data["score_manager"]["level"]
+            self.score_manager.starting_level = load_data["score_manager"]["starting_level"]
+            self.score_manager.deleted_lines= load_data["score_manager"]["deleted_lines"]
+
+            f_data = load_data["falling_block"]
+            n_data = load_data["next_block"]
+            self.falling_block = Tetromino(
+                self,
+                init_name=f_data["name"],
+                init_shape=f_data["shape"],
+                init_x=f_data["x"],
+                init_y=f_data["y"]
+            )
+            self.next_block = Tetromino(
+                self,
+                init_name=n_data["name"],
+                init_shape=n_data["shape"],
+                init_x=n_data["x"],
+                init_y=n_data["y"]
+            )
+
         self.game_over = False
         self.pause = False
         self.color_scheme = True
         self.ghost_brick = False
+        self.load_from_file = False
+
 
     def display_text(self,stdscr):
         text_color = curses.color_pair(4)
@@ -88,6 +118,7 @@ class Game:
         self.display_next_block(stdscr)
 
         for y in range(self.board.height):
+            color_block = ""
             for  x in range(self.board.width):
                 symbol = self.board.grid[x, y]
 
@@ -101,6 +132,7 @@ class Game:
 
                 #duch kostky
                 elif (x,y) in ghost and self.ghost_brick:
+
                     symbol = self.falling_block.name
                     if self.color_scheme:
                         color_id = COLOR_MAP[symbol]
@@ -236,7 +268,7 @@ class Game:
                 elif key in ACTION_KEYS["DROP"]:
                     self.hard_drop()
                 elif key in ACTION_KEYS["QUIT"]:
-                    self.game_over = True
+                    break
 
 
                 if current_time - last_fall_time >fall_speed:
@@ -247,7 +279,13 @@ class Game:
                     self.pause = False
                     last_fall_time = current_time
                 elif key in ACTION_KEYS["QUIT"]:
-                    self.game_over = True
+                    break
+
+        if not self.game_over:
+            text_color = curses.color_pair(4)
+            stdscr.addstr(self.board.height // 2, 0, "HRA ULOŽENA!", text_color)
+            self.save_manager.save_game(self)
+            return "MENU"
 
         self.display_game_over(stdscr)
-        return "Game Stop"
+        return "GAME STOP"
