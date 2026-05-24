@@ -17,6 +17,8 @@ class Game:
         self.renderer = GameRenderer(self)
         self.save_manager = SaveManager()
         self.db = DatabaseManager()
+        self.top_score = self.db.get_highest_score()
+        self.top_ten_score = self.db.top_ten()
 
         if load_data is None:
             self.falling_block = Tetromino(self)
