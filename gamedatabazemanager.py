@@ -26,4 +26,10 @@ class DatabaseManager:
         self.cursor.execute(sql_query)
 
         return self.cursor.fetchall()
-hra = DatabaseManager()
+
+
+    def get_highest_score(self):
+        sql_query = "SELECT name,score FROM high_score ORDER BY score DESC LIMIT 1"
+        self.cursor.execute(sql_query)
+        return self.cursor.fetchone()
+    
