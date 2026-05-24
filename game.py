@@ -1,10 +1,12 @@
 import curses
 import time
-from config import COLOR_MAP, ACTION_KEYS
+from config import ACTION_KEYS
 from block import Tetromino
 from gamescoremanager import GameScoreManager
 from gameboard import GameBoard
 from savemanager import SaveManager
+from gamerenderer import GameRenderer
+from gamedatabazemanager import DatabaseManager
 
 
 class Game:
@@ -12,7 +14,9 @@ class Game:
     def __init__(self,starting_level,load_data = None):
         self.board = GameBoard()
         self.score_manager = GameScoreManager(starting_level)
+        self.renderer = GameRenderer(self)
         self.save_manager = SaveManager()
+        self.db = DatabaseManager()
 
         if load_data is None:
             self.falling_block = Tetromino(self)
@@ -48,111 +52,6 @@ class Game:
         self.load_from_file = False
 
 
-    def display_text(self,stdscr):
-        text_color = curses.color_pair(4)
-        if self.color_scheme:
-            number_color = curses.color_pair(2) | curses.A_BOLD
-        else:
-            number_color = curses.color_pair(4) | curses.A_BOLD
-
-        if not self.game_over:
-            stdscr.addstr(15, 20, "Skóre: ", text_color)
-            stdscr.addstr(16, 20, "Počet smazaných řad: ",text_color)
-            stdscr.addstr(17, 20, "Aktualní úroveň: ",text_color)
-            len_score = len("Skóre: ")
-            len_line = len("Počet smazaných řad: ")
-            len_level= len("Aktualní úroveň: ")
-            stdscr.addstr(15,20+len_score, str(self.score_manager.score),number_color)
-            stdscr.addstr(16,20+len_line, str(self.score_manager.deleted_lines),number_color)
-            stdscr.addstr(17,20+len_level, str(self.score_manager.level),number_color)
-
-            if self.pause:
-                if self.color_scheme:
-                    text_color = curses.color_pair(5) | curses.A_BOLD
-                else:
-                    text_color = curses.color_pair(4) | curses.A_BOLD
-
-                stdscr.addstr(self.board.height // 2, 20, "PAUZA!",text_color)
-                stdscr.addstr((self.board.height // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
-
-    def display_game_over(self,stdscr):
-        text_color = curses.color_pair(4)
-        if self.game_over:
-            if self.color_scheme:
-                number_color = curses.color_pair(2) | curses.A_BOLD
-            else:
-                number_color = curses.color_pair(4) | curses.A_BOLD
-
-            stdscr.erase()
-            stdscr.addstr(self.board.height // 2, 0, "GAME OVER!", text_color)
-            stdscr.addstr((self.board.height // 2) + 1, 0, f"Tvé skore: ",text_color)
-            len_score = len("Tvé skore: ")
-            stdscr.addstr((self.board.height // 2) + 1, 0+len_score, str(self.score_manager.score),number_color)
-            stdscr.nodelay(False)
-            stdscr.getch()
-
-
-    def display_next_block(self,stdscr):
-        text_color = curses.color_pair(4)
-        passive_coords = self.next_block.relative_blocks
-        display_coords = []
-        stdscr.addstr(0, 20, "Následující kostka:",text_color)
-        for x, y in passive_coords:
-            display_coords.append((x + 29, y + 3))
-
-        for x, y in display_coords:
-            symbol = self.next_block.name
-            if self.color_scheme:
-                block_color = curses.color_pair(self.next_block.color_id) | curses.A_BOLD
-            else:
-                block_color = curses.color_pair(4) | curses.A_BOLD
-
-            stdscr.addstr(y,x,symbol,block_color)
-
-
-    def display(self,stdscr):
-        stdscr.erase()
-        active_coords = self.falling_block.get_world_coordinates()
-        ghost = self.ghost_brick_coords()
-        self.display_text(stdscr)
-        self.display_next_block(stdscr)
-
-        for y in range(self.board.height):
-            color_block = ""
-            for  x in range(self.board.width):
-                symbol = self.board.grid[x, y]
-
-                #Aktivní kostka
-                if (x,y) in active_coords:
-                    symbol = self.falling_block.name
-                    if self.color_scheme:
-                        color_block = curses.color_pair(self.falling_block.color_id)
-                    else:
-                        color_block = curses.color_pair(4) | curses.A_BOLD
-
-                #duch kostky
-                elif (x,y) in ghost and self.ghost_brick:
-
-                    symbol = self.falling_block.name
-                    if self.color_scheme:
-                        color_id = COLOR_MAP[symbol]
-                        color_block = curses.color_pair(color_id) | curses.A_DIM
-                    else:
-                        color_block = curses.color_pair(4) | curses.A_DIM
-
-                # pasivní kostka v gridu
-                elif symbol in COLOR_MAP:
-                    if self.color_scheme:
-                        color_id = COLOR_MAP[symbol]
-                        color_block = curses.color_pair(color_id)
-                    else:
-                        color_block = curses.color_pair(4) | curses.A_DIM
-                # herní oblast
-                elif symbol in ["║", "╚", "╝", "═"]:
-                    color_block = curses.color_pair(4) | curses.A_BOLD
-
-                stdscr.addstr(y, x, symbol, color_block)
-        stdscr.refresh()
 
 
     def ghost_brick_coords(self):
@@ -182,7 +81,7 @@ class Game:
         coordinates = self.falling_block.get_world_coordinates()
         name = self.falling_block.name
         self.board.lock_pieces(coordinates,name)
-
+        self.score_manager.count_pieces += 1
         cleared_lines = self.board.check_lines()
         self.score_manager.line_clear_score(cleared_lines)
 
@@ -226,6 +125,8 @@ class Game:
         self.score_manager.hard_drop_score(lines)
         self.lock_piece()
 
+
+
     def rotate(self):
         new_coords = []
         coords = self.falling_block.relative_blocks
@@ -249,7 +150,7 @@ class Game:
         stdscr.nodelay(True)
         last_fall_time = time.time()
         while not self.game_over:
-            self.display(stdscr)
+            self.renderer.display(stdscr)
             key = stdscr.getch()
             stdscr.keypad(True)
             fall_speed = self.score_manager.fall_speed
@@ -282,10 +183,12 @@ class Game:
                     break
 
         if not self.game_over:
-            text_color = curses.color_pair(4)
-            stdscr.addstr(self.board.height // 2, 0, "HRA ULOŽENA!", text_color)
             self.save_manager.save_game(self)
             return "MENU"
 
-        self.display_game_over(stdscr)
+
+        name = self.renderer.game_over_screen(stdscr)
+
+        self.db.save_score(name,self.score_manager.score,self.score_manager.level,self.score_manager.count_pieces)
+
         return "GAME STOP"
