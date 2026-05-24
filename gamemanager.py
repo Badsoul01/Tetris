@@ -55,7 +55,7 @@ class GameManager:
                     self.tetris.ghost_brick = self.menu.settings["ghost_brick"]
 
                     action = self.tetris.game_loop(stdscr)
-                    if action == "GANE STOP" or action == "MENU":
+                    if action == "GAME STOP" or action == "MENU":
                         self.state = "MENU"
 
 
