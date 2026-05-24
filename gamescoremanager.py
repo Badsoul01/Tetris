@@ -6,6 +6,7 @@ class GameScoreManager:
         self.starting_level = starting_level
         self.level = starting_level
         self.fall_speed = max(0.1, 0.7 - (min(self.level, 15) - 1) * 0.05)
+        self.count_pieces = 0
 
     def hard_drop_score(self,lines_drop):
         self.score += lines_drop*2
