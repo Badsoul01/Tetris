@@ -1,4 +1,6 @@
 import curses
+from xxlimited_35 import Null
+
 from config import COLOR_MAP, ACTION_KEYS
 
 
@@ -6,6 +8,8 @@ class GameRenderer:
 
     def __init__(self,game):
         self.game = game
+        self.offset_x = 25
+        self.offset_y = 2
 
 
     def display_text(self,stdscr):
@@ -16,15 +20,15 @@ class GameRenderer:
             number_color = curses.color_pair(4) | curses.A_BOLD
 
         if not self.game.game_over:
-            stdscr.addstr(15, 20, "Skóre: ", text_color)
-            stdscr.addstr(16, 20, "Počet smazaných řad: ",text_color)
-            stdscr.addstr(17, 20, "Aktualní úroveň: ",text_color)
+            stdscr.addstr(19+self.offset_y, 20+self.offset_x, "Skóre: ", text_color)
+            stdscr.addstr(20+self.offset_y, 20+self.offset_x, "Počet smazaných řad: ",text_color)
+            stdscr.addstr(21+self.offset_y, 20+self.offset_x, "Aktualní úroveň: ",text_color)
             len_score = len("Skóre: ")
             len_line = len("Počet smazaných řad: ")
             len_level= len("Aktualní úroveň: ")
-            stdscr.addstr(15,20+len_score, str(self.game.score_manager.score),number_color)
-            stdscr.addstr(16,20+len_line, str(self.game.score_manager.deleted_lines),number_color)
-            stdscr.addstr(17,20+len_level, str(self.game.score_manager.level),number_color)
+            stdscr.addstr(19+self.offset_y,20+len_score+self.offset_x, str(self.game.score_manager.score),number_color)
+            stdscr.addstr(20+self.offset_y,20+len_line+self.offset_x, str(self.game.score_manager.deleted_lines),number_color)
+            stdscr.addstr(21+self.offset_y,20+len_level+self.offset_x, str(self.game.score_manager.level),number_color)
 
             if self.game.pause:
                 if self.game.color_scheme:
@@ -32,17 +36,17 @@ class GameRenderer:
                 else:
                     text_color = curses.color_pair(4) | curses.A_BOLD
 
-                stdscr.addstr(self.game.board.height // 2, 20, "PAUZA!",text_color)
-                stdscr.addstr((self.game.board.height // 2) + 1, 20, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
+                stdscr.addstr(self.game.board.height // 2, 20+self.offset_x, "PAUZA!",text_color)
+                stdscr.addstr((self.game.board.height // 2) + 1, 20+self.offset_x, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
 
 
     def display_next_block(self,stdscr):
         text_color = curses.color_pair(4)
         passive_coords = self.game.next_block.relative_blocks
         display_coords = []
-        stdscr.addstr(0, 20, "Následující kostka:",text_color)
+        stdscr.addstr(7+self.offset_y, self.offset_x+20, "Následující kostka:",text_color)
         for x, y in passive_coords:
-            display_coords.append((x + 29, y + 3))
+            display_coords.append((x+self.offset_x + 29, y +self.offset_y+ 3))
 
         for x, y in display_coords:
             symbol = self.game.next_block.name
@@ -51,8 +55,61 @@ class GameRenderer:
             else:
                 block_color = curses.color_pair(4) | curses.A_BOLD
 
-            stdscr.addstr(y,x,symbol,block_color)
+            stdscr.addstr(y+7,x,symbol,block_color)
 
+    def display_highest_score(self,stdscr):
+        if self.game.color_scheme:
+            number_color = curses.color_pair(2) | curses.A_BOLD
+        else:
+            number_color = curses.color_pair(4) | curses.A_BOLD
+
+        text_color = curses.color_pair(4)
+        stdscr.addstr(3,3,"T O P  S K Ó R E:",text_color)
+        if self.game.top_score:
+            name = self.game.top_score[0]
+            len_name = len(name)
+            score = self.game.top_score[1]
+        else:
+            name = "---"
+            len_name = len(name)
+            score = 0
+
+        stdscr.addstr(4,3, f" {name}: ",text_color)
+        stdscr.addstr(4,3+len_name,f"  {score}",number_color)
+
+    def display_top_ten(self,stdscr):
+        top_ten = self.game.top_ten_score
+        score = self.game.score_manager.score
+        max_player = len(top_ten)
+        player_one = None
+        player_two = None
+        my_position = None
+        if top_ten:
+
+            for position, points in enumerate(top_ten):
+                if score >= points[1]:
+                    my_position = position
+                    break
+
+            if my_position is None:
+                if max_player >=1:
+                    player_one = top_ten[max_player-1]
+                if max_player>=2:
+                    player_two= top_ten[max_player-2]
+            elif my_position == 0:
+                if max_player >= 2:
+                    player_one = top_ten[1]
+                if max_player >=3:
+                    player_two = top_ten[2]
+            else:
+
+                player_one = top_ten[my_position-1]
+                player_two = top_ten[my_position]
+
+        if player_one:
+            stdscr.addstr(20,3,f"{player_one[0]} : {player_one[1]}")
+        if player_two:
+            stdscr.addstr(21,3,f"{player_two[0]} : {player_two[1]}")
 
     def display(self,stdscr):
         stdscr.erase()
@@ -60,6 +117,8 @@ class GameRenderer:
         ghost = self.game.ghost_brick_coords()
         self.display_text(stdscr)
         self.display_next_block(stdscr)
+        self.display_highest_score(stdscr)
+        self.display_top_ten(stdscr)
 
         for y in range(self.game.board.height):
             color_block = ""
@@ -76,7 +135,7 @@ class GameRenderer:
 
                 #duch kostky
                 elif (x,y) in ghost and self.game.ghost_brick:
-                    symbol = self.game.gamefalling_block.name
+                    symbol = self.game.falling_block.name
                     if self.game.color_scheme:
                         color_id = COLOR_MAP[symbol]
                         color_block = curses.color_pair(color_id) | curses.A_DIM
@@ -94,7 +153,7 @@ class GameRenderer:
                 elif symbol in ["║", "╚", "╝", "═"]:
                     color_block = curses.color_pair(4) | curses.A_BOLD
 
-                stdscr.addstr(y, x, symbol, color_block)
+                stdscr.addstr(y+self.offset_y, x+self.offset_x, symbol, color_block)
         stdscr.refresh()
 
     def game_over_screen(self,stdscr):
