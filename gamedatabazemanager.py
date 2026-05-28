@@ -6,14 +6,14 @@ class DatabaseManager:
     def __init__(self):
         self.connection = sqlite3.connect("highscores.db")
         self.cursor = self.connection.cursor()
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS high_score(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, level INTEGER,pieces INTEGER)")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS high_score(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, level INTEGER,pieces INTEGER,rows INTEGER)")
         self.connection.commit()
 
 
-    def save_score(self,name,score,level,pieces):
-        sql_query= "INSERT INTO high_score(name,score,level,pieces) VALUES (?,?,?,?)"
+    def save_score(self,name,score,level,pieces,rows):
+        sql_query= "INSERT INTO high_score(name,score,level,pieces,rows) VALUES (?,?,?,?,?)"
 
-        values = (name, score, level, pieces)
+        values = (name, score, level, pieces,rows)
 
         self.cursor.execute(sql_query, values)
 
@@ -22,7 +22,7 @@ class DatabaseManager:
 
 
     def top_ten(self):
-        sql_query = "SELECT name,score,level,pieces FROM high_score ORDER BY score DESC LIMIT 10"
+        sql_query = "SELECT name,score,level,pieces,rows FROM high_score ORDER BY score DESC LIMIT 10"
         self.cursor.execute(sql_query)
 
         return self.cursor.fetchall()
