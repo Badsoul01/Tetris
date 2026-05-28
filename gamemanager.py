@@ -4,15 +4,21 @@ from gamemenu import GameMenu
 from game import Game
 from config import CURSES_COLORS
 from savemanager import  SaveManager
+from gamedatabazemanager import DatabaseManager
+import pygame
+
 
 class GameManager:
 
     def __init__(self):
+        self.db = DatabaseManager()
         self.tetris = None
         self.menu = GameMenu()
         self.state = "MENU"
         self.curses_colors = CURSES_COLORS
-
+        pygame.mixer.init()
+        pygame.mixer.music.load("tetris_theme.mp3")
+        pygame.mixer.music.play(-1)
 
     def run_game(self,stdscr):
         curses.curs_set(0)
@@ -25,6 +31,7 @@ class GameManager:
         while self.state != "EXIT GAME":
             match self.state:
                 case "MENU":
+                    self.menu.top_ten = self.db.top_ten()
                     action = self.menu.menu_loop(stdscr)
                     if action == "CONTINUE":
                         self.state = "CONTINUE"
