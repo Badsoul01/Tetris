@@ -78,8 +78,6 @@ class GameMenu:
                 return f"   {text}   "
 
 
-
-        return  final_text
     def _toggle_colors(self):
         self.settings["colors"] = not self.settings["colors"]
 
