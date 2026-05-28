@@ -1,4 +1,3 @@
-import curses
 import time
 from config import ACTION_KEYS
 from block import Tetromino
@@ -6,7 +5,6 @@ from gamescoremanager import GameScoreManager
 from gameboard import GameBoard
 from savemanager import SaveManager
 from gamerenderer import GameRenderer
-from gamedatabazemanager import DatabaseManager
 
 
 class Game:
@@ -16,9 +14,6 @@ class Game:
         self.score_manager = GameScoreManager(starting_level)
         self.renderer = GameRenderer(self)
         self.save_manager = SaveManager()
-        self.db = DatabaseManager()
-        self.top_score = self.db.get_highest_score()
-        self.top_ten_score = self.db.top_ten()
 
         if load_data is None:
             self.falling_block = Tetromino(self)
@@ -52,8 +47,9 @@ class Game:
         self.color_scheme = True
         self.ghost_brick = False
         self.load_from_file = False
-
-
+        self.player_name = ""
+        self.highest_score = 0
+        self.top_ten_score = []
 
 
     def ghost_brick_coords(self):
@@ -189,8 +185,6 @@ class Game:
             return "MENU"
 
 
-        name = self.renderer.game_over_screen(stdscr)
-
-        self.db.save_score(name,self.score_manager.score,self.score_manager.level,self.score_manager.count_pieces)
+        self.player_name = self.renderer.game_over_screen(stdscr)
 
         return "GAME STOP"
