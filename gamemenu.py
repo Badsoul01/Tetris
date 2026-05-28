@@ -35,7 +35,51 @@ class GameMenu:
         }
 
 
+    def _draw_logo(self,stdscr):
+        for letter, coordinates in self.logo.items():
+            if self.settings["colors"]:
+                if letter in COLOR_MAP:
+                    color_id = COLOR_MAP[letter]
+                else:
+                    color_id = 4
+            else:
 
+                color_id = 4
+
+            for x, y in coordinates:
+                stdscr.addstr(y, x * 2, letter, curses.color_pair(color_id))
+
+    def _format_item_text(self,text,is_selected):
+        settings ={
+            "BARVY" : self.settings["colors"],
+            "DUCH KOSTKY": self.settings["ghost_brick"],
+            "HUDBA" : self.settings["music"],
+            "POČÁTEČNÍ LEVEL": self.settings["starting_level"]
+        }
+
+        state_text = ""
+        if text not in settings:
+            state_text = ""
+        elif text  == "POČÁTEČNÍ LEVEL":
+            state_text = str(settings["POČÁTEČNÍ LEVEL"])
+        else:
+            state_text = "Zapnuto" if settings[text] else "Vypnuto"
+
+
+        if state_text:
+            if is_selected:
+                return f"{text}:     --> {state_text} <--"
+            else:
+                return f"{text}:    {state_text}   "
+        else:
+            if is_selected:
+                return f"  --> {text} <--"
+            else:
+                return f"   {text}   "
+
+
+
+        return  final_text
     def _toggle_colors(self):
         self.settings["colors"] = not self.settings["colors"]
 
@@ -73,84 +117,43 @@ class GameMenu:
     def display_menu(self, stdscr):
         stdscr.erase()
         # vykreslení loga
-        for letter, coordinates in self.logo.items():
-            if self.settings["colors"]:
-                if letter in COLOR_MAP:
-                    color_id = COLOR_MAP[letter]
-                else:
-                    color_id = 4
-            else:
-
-                color_id = 4
-
-            for x, y in coordinates:
-                stdscr.addstr(y, x * 2, letter, curses.color_pair(color_id))
-
-        # vykreslení menu
-        colors = "Zapnuto" if self.settings["colors"] else "Vypnuto"
-        ghost = "Zapnuto" if self.settings["ghost_brick"] else "Vypnuto"
-        music = "Zapnuto" if self.settings["music"] else "Vypnuto"
+        self._draw_logo(stdscr)
 
         start_y = 18
         start_x = 27
+        if self.current_screen == self.top_10_menu:
 
-        for i, text in enumerate(self.current_screen):
-            if text == "BARVY":
-                state = colors
-            elif text == "DUCH KOSTKY":
-                state = ghost
-            elif text == "POČÁTEČNÍ LEVEL":
-                state = self.settings["starting_level"]
-            elif text == "HUDBA":
-                state = music
+            if self.top_ten:
+                stdscr.addstr(start_y - 3, start_x + 10, "TOP 10 VÝSLEDKŮ:", curses.color_pair(4))
+                stdscr.addstr(start_y - 2, start_x, "POŘADÍ | JMÉNO | SCORE | LEVEL | KOSTKY* | ŘADY**",
+                              curses.color_pair(4))
+                top = self.top_ten
+                for position, points in enumerate(top):
+                    name = points[0]
+                    score = points[1]
+                    level = points[2]
+                    pieces = points[3]
+                    rows = points[4]
+                    stdscr.addstr(start_y + position, start_x,
+                                  f"{position + 1:>5}.  {name:^6} {score:>7} {level:>7}  {pieces:>7} {rows:>7}",
+                                  curses.color_pair(4))
+                    stdscr.addstr(start_y + position + 1, start_x, " ")
+
+                stdscr.addstr(start_y + 13, start_x, "* počet padlých dílů", curses.color_pair(4))
+                stdscr.addstr(start_y + 14, start_x, "** počet vymazaných řad", curses.color_pair(4))
             else:
-                state = ""
+                stdscr.addstr(start_y - 1, start_x, "ŽÁDNÉ VÝSLEDKY K ZOBRAZENÍ", curses.color_pair(4))
 
-            if i == self.index_menu:
+        for i,text in enumerate(self.current_screen):
+            is_selected = (i == self.index_menu)
+            final_text = self._format_item_text(text,is_selected)
+
+            if is_selected:
                 style = curses.color_pair(2) | curses.A_BOLD
-                if state:
-                    final_text = f"{text}:   -->  {state}  <--"
-                else:
-                    final_text = f"  -->  {text}  <--"
             else:
                 style = curses.color_pair(4)
-                if state:
-                    final_text = f"{text}:  {state} "
-                else:
-                    final_text = f"   {text}"
 
-            if text == "ZPĚT":
-                if self.current_screen == self.tutorial or self.current_screen == self.top_10_menu:
-                    style = curses.color_pair(2) | curses.A_BOLD
-                    final_text = f"  -->  {text}  <--"
-                if self.current_screen == self.top_10_menu:
-                    stdscr.addstr(start_y + 15, start_x + 10, final_text, style)
-                else:
-                    stdscr.addstr(start_y + 1 + i, start_x + 4, final_text, style)
-            else:
-                stdscr.addstr(start_y + i, start_x, final_text, style)
-            if self.current_screen == self.top_10_menu:
-
-                if self.top_ten:
-                    stdscr.addstr(start_y - 3, start_x + 10, "TOP 10 VÝSLEDKŮ:", curses.color_pair(4))
-                    stdscr.addstr(start_y - 2, start_x, "POŘADÍ | JMÉNO | SCORE | LEVEL | KOSTKY* | ŘADY**",
-                                  curses.color_pair(4))
-                    top = self.top_ten
-                    for position,points in enumerate(top):
-                        name = points[0]
-                        score = points[1]
-                        level = points[2]
-                        pieces = points[3]
-                        rows = points[4]
-                        stdscr.addstr(start_y+position,start_x,f"{position+1:>5}.  {name:^6} {score:>7} {level:>7}  {pieces:>7} {rows:>7}",curses.color_pair(4))
-                        stdscr.addstr(start_y+position+1, start_x," ")
-
-                    stdscr.addstr(start_y+13,start_x, "* počet padlých dílů",curses.color_pair(4))
-                    stdscr.addstr(start_y + 14, start_x, "** počet vymazaných řad", curses.color_pair(4))
-                else:
-                    stdscr.addstr(start_y -1, start_x, "ŽÁDNÉ VÝSLEDKY K ZOBRAZENÍ", curses.color_pair(4))
-
-
+            stdscr.addstr(start_y + i, start_x, final_text, style)
 
 
     def menu_loop(self,stdscr):
