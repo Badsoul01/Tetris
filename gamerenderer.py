@@ -63,18 +63,16 @@ class GameRenderer:
 
     def display_highest_score(self,stdscr):
         text_color, number_color = self.display_colors()
-        stdscr.addstr(3,3,"T O P  S K Ó R E:",text_color)
-        if self.game.top_score:
-            name = self.game.top_score[0]
-            len_name = len(name)
-            score = self.game.top_score[1]
-        else:
-            name = "---"
-            len_name = len(name)
-            score = 0
 
-        stdscr.addstr(4,3, f" {name}: ",text_color)
-        stdscr.addstr(4,4+len_name,f"  {score}",number_color)
+        if self.game.top_ten_score:
+            stdscr.addstr(3, 3, "T O P  S K Ó R E:", text_color)
+            name = self.game.top_ten_score[0]
+            len_name = len(name)
+            score = self.game.top_ten_score[1]
+            stdscr.addstr(4, 3, f" {name}: ", text_color)
+            stdscr.addstr(4, 4 + len_name, f"  {score}", number_color)
+
+
 
     def display_top_ten(self,stdscr):
         text_color, number_color = self.display_colors()
@@ -87,9 +85,9 @@ class GameRenderer:
         rank_two = None
 
         my_position = None
-        stdscr.addstr(17, 6, "ŽEBŘÍČEK:", text_color)
-        if top_ten:
 
+        if top_ten:
+            stdscr.addstr(17, 6, "ŽEBŘÍČEK:", text_color)
             for position, points in enumerate(top_ten):
                 if score >= points[1]:
                     my_position = position
@@ -171,6 +169,13 @@ class GameRenderer:
                     p2_score = str(player_two[1])
                     stdscr.addstr(23, 3, f"{rank_two}. {p2} : ", text_color)
                     stdscr.addstr(23, 4 + 8, p2_score, number_color)
+
+        else:
+            your_score = "Tvé score:"
+            color = curses.color_pair(5)
+            number_of_your_score = self.game.score_manager.score
+            stdscr.addstr(19, 3, f"{your_score} ", color)
+            stdscr.addstr(19, 4 + len(your_score), str(number_of_your_score), number_color)
 
 
     def display(self,stdscr):
