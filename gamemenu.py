@@ -124,25 +124,32 @@ class GameMenu:
                     style = curses.color_pair(2) | curses.A_BOLD
                     final_text = f"  -->  {text}  <--"
                 if self.current_screen == self.top_10_menu:
-                    stdscr.addstr(start_y + 12, start_x + 4, final_text, style)
+                    stdscr.addstr(start_y + 15, start_x + 10, final_text, style)
                 else:
                     stdscr.addstr(start_y + 1 + i, start_x + 4, final_text, style)
             else:
                 stdscr.addstr(start_y + i, start_x, final_text, style)
             if self.current_screen == self.top_10_menu:
-                stdscr.addstr(start_y-3,start_x+10,"TOP 10 VÝSLEDKŮ:",curses.color_pair(4))
-                stdscr.addstr(start_y - 2, start_x, "POŘADÍ | JMÉNO | SCORE | LEVEL | KOSTKY", curses.color_pair(4))
+
                 if self.top_ten:
+                    stdscr.addstr(start_y - 3, start_x + 10, "TOP 10 VÝSLEDKŮ:", curses.color_pair(4))
+                    stdscr.addstr(start_y - 2, start_x, "POŘADÍ | JMÉNO | SCORE | LEVEL | KOSTKY* | ŘADY**",
+                                  curses.color_pair(4))
                     top = self.top_ten
                     for position,points in enumerate(top):
                         name = points[0]
                         score = points[1]
                         level = points[2]
                         pieces = points[3]
-                        stdscr.addstr(start_y+position,start_x,f"{position+1:>5}.  {name:^6} {score:>7} {level:>7}  {pieces:>7}",curses.color_pair(4))
+                        rows = points[4]
+                        stdscr.addstr(start_y+position,start_x,f"{position+1:>5}.  {name:^6} {score:>7} {level:>7}  {pieces:>7} {rows:>7}",curses.color_pair(4))
                         stdscr.addstr(start_y+position+1, start_x," ")
+
+                    stdscr.addstr(start_y+13,start_x, "* počet padlých dílů",curses.color_pair(4))
+                    stdscr.addstr(start_y + 14, start_x, "** počet vymazaných řad", curses.color_pair(4))
                 else:
                     stdscr.addstr(start_y -1, start_x, "ŽÁDNÉ VÝSLEDKY K ZOBRAZENÍ", curses.color_pair(4))
+
 
 
 
