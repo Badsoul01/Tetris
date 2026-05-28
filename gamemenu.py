@@ -22,8 +22,37 @@ class GameMenu:
                          }
         self.top_ten = []
         self.update_main_menu()
+        self.settings_menu_action = {
+            "BARVY": self._toggle_colors,
+            "DUCH KOSTKY": self._toggle_ghost_brick,
+            "HUDBA": self._toggle_music,
+            "POČÁTEČNÍ LEVEL": self._change_level
+        }
+        self.menu_returns = {
+            "NOVÁ HRA":"NEW GAME",
+            "POKRAČOVAT": "CONTINUE",
+            "EXIT": "EXIT GAME"
+        }
 
 
+
+    def _toggle_colors(self):
+        self.settings["colors"] = not self.settings["colors"]
+
+    def _toggle_ghost_brick(self):
+        self.settings["ghost_brick"]= not self.settings["ghost_brick"]
+
+    def _toggle_music(self):
+        self.settings["music"] = not self.settings["music"]
+        if self.settings["music"]:
+            pygame.mixer.music.unpause()
+        else:
+            pygame.mixer.music.pause()
+
+    def _change_level(self):
+        self.settings["starting_level"] += 1
+        if self.settings["starting_level"] > 10:
+            self.settings["starting_level"] = 1
 
 
     def  update_main_menu(self):
@@ -141,51 +170,29 @@ class GameMenu:
 
 
             #potvrzování menu
-            if self.current_screen[self.index_menu] == "POKRAČOVAT" and key in ACTION_KEYS["ENTER"]:
-                return "CONTINUE"
+            if key in ACTION_KEYS["ENTER"]:
+                selected_item = self.current_screen[self.index_menu]
+                if selected_item in self.settings_menu_action:
+                    self.settings_menu_action[selected_item]()
 
-            if self.current_screen[self.index_menu] == "NOVÁ HRA" and key in ACTION_KEYS["ENTER"]:
-                return "NEW GAME"
+                elif selected_item in self.menu_returns:
+                    return self.menu_returns[selected_item]
 
-            elif self.current_screen[self.index_menu] == "TUTORIÁL" and key in ACTION_KEYS["ENTER"]:
-                self.menu_history.append((self.current_screen, self.index_menu))
-                self.index_menu = len(self.tutorial)-1
-                self.current_screen = self.tutorial
+                elif selected_item == "TUTORIÁL":
+                    self.menu_history.append((self.current_screen, self.index_menu))
+                    self.index_menu = len(self.tutorial)-1
+                    self.current_screen = self.tutorial
 
-            elif self.current_screen[self.index_menu] == "NASTAVENÍ" and key in ACTION_KEYS["ENTER"]:
-                self.menu_history.append((self.current_screen, self.index_menu))
-                self.index_menu = 0
-                self.current_screen = self.settings_menu
+                elif selected_item == "NASTAVENÍ":
+                    self.menu_history.append((self.current_screen, self.index_menu))
+                    self.index_menu = 0
+                    self.current_screen = self.settings_menu
 
-            elif self.current_screen[self.index_menu] == "SÍŇ SLÁVY" and key in ACTION_KEYS["ENTER"]:
-                self.menu_history.append((self.current_screen, self.index_menu))
-                self.index_menu = len(self.top_10_menu) - 1
-                self.current_screen = self.top_10_menu
+                elif selected_item == "SÍŇ SLÁVY":
+                    self.menu_history.append((self.current_screen, self.index_menu))
+                    self.index_menu = len(self.top_10_menu) - 1
+                    self.current_screen = self.top_10_menu
 
-
-
-            elif self.current_screen[self.index_menu] == "EXIT" and key in ACTION_KEYS["ENTER"]:
-                return "EXIT GAME"
-
-
-            elif self.current_screen[self.index_menu] == "BARVY" and key in ACTION_KEYS["ENTER"]:
-                self.settings["colors"] = not self.settings["colors"]
-
-            elif self.current_screen[self.index_menu] == "DUCH KOSTKY" and key in ACTION_KEYS["ENTER"]:
-                self.settings["ghost_brick"] = not self.settings["ghost_brick"]
-
-            elif self.current_screen[self.index_menu] == "HUDBA" and key in ACTION_KEYS["ENTER"]:
-                self.settings["music"] = not self.settings["music"]
-                if self.settings["music"]:
-                    pygame.mixer.music.unpause()
-                else:
-                    pygame.mixer.music.pause()
-
-            elif self.current_screen[self.index_menu] == "POČÁTEČNÍ LEVEL" and key in ACTION_KEYS["ENTER"]:
-                self.settings["starting_level"] +=1
-                if self.settings["starting_level"] >10:
-                    self.settings["starting_level"] =1
-
-            elif self.current_screen[self.index_menu] == "ZPĚT" and key in ACTION_KEYS["ENTER"]:
-                self.current_screen, self.index_menu = self.menu_history.pop()
+                elif selected_item == "ZPĚT":
+                    self.current_screen, self.index_menu = self.menu_history.pop()
 
