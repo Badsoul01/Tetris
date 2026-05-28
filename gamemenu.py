@@ -1,6 +1,6 @@
 import curses
 import os
-from config import COLOR_MAP, LOGO_DATA, MAIN_MENU, SETTINGS_MENU, TUTORIAL_TEXT,CURSES_COLORS,ACTION_KEYS,TOP_10
+from config import COLOR_MAP, LOGO_DATA, MAIN_MENU, SETTINGS_MENU, TUTORIAL_TEXT,ACTION_KEYS,TOP_10
 import pygame
 
 class GameMenu:
@@ -57,7 +57,7 @@ class GameMenu:
             "POČÁTEČNÍ LEVEL": self.settings["starting_level"]
         }
 
-        state_text = ""
+
         if text not in settings:
             state_text = ""
         elif text  == "POČÁTEČNÍ LEVEL":
