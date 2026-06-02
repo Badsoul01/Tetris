@@ -1,10 +1,10 @@
 import time
 from config import ACTION_KEYS
 from block import Tetromino
-from gamescoremanager import GameScoreManager
+from scoremanager import GameScoreManager
 from gameboard import GameBoard
 from savemanager import SaveManager
-from gamerenderer import GameRenderer
+from displaymanager import GameRenderer
 
 
 class Game:
