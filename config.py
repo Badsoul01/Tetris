@@ -27,7 +27,7 @@ TUTORIAL_TEXT = [
     "Čtyři         ->                x 1200",
     "",
     "Hard drop     -> 2 body za každý řádek",
-
+    "",
     "ZPĚT"
 ]
 
