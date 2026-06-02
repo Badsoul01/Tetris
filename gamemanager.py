@@ -1,10 +1,10 @@
 import curses
 import  os
 from gamemenu import GameMenu
-from game import Game
+from gamelogic import Game
 from config import CURSES_COLORS
 from savemanager import  SaveManager
-from gamedatabazemanager import DatabaseManager
+from databazemanager import DatabaseManager
 import pygame
 
 
@@ -58,6 +58,7 @@ class GameManager:
                     self.tetris.color_scheme = self.menu.settings["colors"]
                     self.tetris.ghost_brick = self.menu.settings["ghost_brick"]
                     self.tetris.highest_score = self.db.get_highest_score()
+                    self.tetris.top_ten_score = self.db.top_ten()
                     action = self.tetris.game_loop(stdscr)
 
                     if action == "GAME STOP":
@@ -73,7 +74,7 @@ class GameManager:
                     self.tetris.color_scheme = self.menu.settings["colors"]
                     self.tetris.ghost_brick = self.menu.settings["ghost_brick"]
                     self.tetris.highest_score = self.db.get_highest_score()
-                    self.tetris.top_ten = self.db.top_ten()
+                    self.tetris.top_ten_score = self.db.top_ten()
 
                     action = self.tetris.game_loop(stdscr)
                     if action == "GAME STOP":
