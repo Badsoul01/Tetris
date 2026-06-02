@@ -35,7 +35,7 @@ class GameMenu:
         }
 
 
-    def _draw_logo(self,stdscr):
+    def display_logo(self, stdscr):
         for letter, coordinates in self.logo.items():
             if self.settings["colors"]:
                 if letter in COLOR_MAP:
@@ -78,6 +78,7 @@ class GameMenu:
                 return f"   {text}   "
 
 
+
     def _toggle_colors(self):
         self.settings["colors"] = not self.settings["colors"]
 
@@ -90,6 +91,28 @@ class GameMenu:
             pygame.mixer.music.unpause()
         else:
             pygame.mixer.music.pause()
+
+    def display_top_ten_menu(self,stdscr,coord_x,coord_y):
+        if self.top_ten:
+            stdscr.addstr(coord_y - 3, coord_x+10 , "TOP 10 VÝSLEDKŮ:", curses.color_pair(4))
+            stdscr.addstr(coord_y - 2, coord_x, "POŘADÍ | JMÉNO | SCORE | LEVEL | KOSTKY* | ŘADY**",
+                          curses.color_pair(4))
+            top = self.top_ten
+            for position, points in enumerate(top):
+                name = points[0]
+                score = points[1]
+                level = points[2]
+                pieces = points[3]
+                rows = points[4]
+                stdscr.addstr(coord_y + position, coord_x,
+                              f"{position + 1:>5}.  {name:^6} {score:>7} {level:>7}  {pieces:>7} {rows:>7}",
+                              curses.color_pair(4))
+                stdscr.addstr(coord_y + position + 1, coord_x, " ")
+
+            stdscr.addstr(coord_y + 13, coord_x, "* počet padlých dílků", curses.color_pair(4))
+            stdscr.addstr(coord_y + 14, coord_x, "** počet vymazaných řad", curses.color_pair(4))
+        else:
+            stdscr.addstr(coord_y - 1, coord_x, "ŽÁDNÉ VÝSLEDKY K ZOBRAZENÍ", curses.color_pair(4))
 
     def _change_level(self):
         self.settings["starting_level"] += 1
@@ -115,33 +138,11 @@ class GameMenu:
     def display_menu(self, stdscr):
         stdscr.erase()
         # vykreslení loga
-        self._draw_logo(stdscr)
+        self.display_logo(stdscr)
 
+        #vykreslení menu
         start_y = 18
-        start_x = 27
-        if self.current_screen == self.top_10_menu:
-
-            if self.top_ten:
-                stdscr.addstr(start_y - 3, start_x + 10, "TOP 10 VÝSLEDKŮ:", curses.color_pair(4))
-                stdscr.addstr(start_y - 2, start_x, "POŘADÍ | JMÉNO | SCORE | LEVEL | KOSTKY* | ŘADY**",
-                              curses.color_pair(4))
-                top = self.top_ten
-                for position, points in enumerate(top):
-                    name = points[0]
-                    score = points[1]
-                    level = points[2]
-                    pieces = points[3]
-                    rows = points[4]
-                    stdscr.addstr(start_y + position, start_x,
-                                  f"{position + 1:>5}.  {name:^6} {score:>7} {level:>7}  {pieces:>7} {rows:>7}",
-                                  curses.color_pair(4))
-                    stdscr.addstr(start_y + position + 1, start_x, " ")
-
-                stdscr.addstr(start_y + 13, start_x, "* počet padlých dílů", curses.color_pair(4))
-                stdscr.addstr(start_y + 14, start_x, "** počet vymazaných řad", curses.color_pair(4))
-            else:
-                stdscr.addstr(start_y - 1, start_x, "ŽÁDNÉ VÝSLEDKY K ZOBRAZENÍ", curses.color_pair(4))
-
+        start_x = 20
         for i,text in enumerate(self.current_screen):
             is_selected = (i == self.index_menu)
             final_text = self._format_item_text(text,is_selected)
@@ -150,9 +151,17 @@ class GameMenu:
                 style = curses.color_pair(2) | curses.A_BOLD
             else:
                 style = curses.color_pair(4)
+            if text == "ZPĚT" and self.current_screen == self.settings_menu:
+                stdscr.addstr(start_y +len(self.settings)+2, start_x, final_text, style)
 
-            stdscr.addstr(start_y + i, start_x, final_text, style)
+            elif text == "ZPĚT" and self.current_screen == self.top_10_menu:
+                stdscr.addstr(start_y+17,start_x+10,final_text,style)
 
+            else:
+                stdscr.addstr(start_y + i, start_x, final_text, style)
+
+        if self.current_screen == self.top_10_menu:
+            self.display_top_ten_menu(stdscr,start_x,start_y)
 
     def menu_loop(self,stdscr):
         stdscr.nodelay(False)
