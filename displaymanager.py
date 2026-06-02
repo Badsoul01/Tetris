@@ -1,5 +1,4 @@
 import curses
-from xxlimited_35 import Null
 
 from config import COLOR_MAP, ACTION_KEYS
 
@@ -11,8 +10,19 @@ class GameRenderer:
         self.offset_x = 25
         self.offset_y = 2
 
+    def _display_ladder_player_score(self, stdsrc, player_name, player_score, player_rank, coord_x, coord_y, ):
+        text_color,number_color = self._display_colors()
+        stdsrc.addstr(coord_y,coord_x, f"{player_rank}. {player_name} : ", text_color)
+        stdsrc.addstr(coord_y, (1+coord_x)+9, player_score, number_color)
 
-    def display_colors(self):
+    def _display_player_score(self,stdsrc,player_score,coord_x,coord_y):
+        player_color = curses.color_pair(5)
+        number_color = self._display_colors()[1]
+        your_score = "Tvé score:"
+        stdsrc.addstr(coord_y,coord_x, f"{your_score} ", player_color)
+        stdsrc.addstr(coord_y, (1+coord_x)+ len(your_score), str(player_score), number_color)
+
+    def _display_colors(self):
         text_clr = curses.color_pair(4)
         if self.game.color_scheme:
             number_clr = curses.color_pair(2) | curses.A_BOLD
@@ -22,7 +32,7 @@ class GameRenderer:
         return text_clr, number_clr
 
     def display_text(self,stdscr):
-        text_color, number_color = self.display_colors()
+        text_color, number_color = self._display_colors()
 
         if not self.game.game_over:
             stdscr.addstr(20+self.offset_y, 20+self.offset_x, "Počet smazaných řad: ",text_color)
@@ -40,12 +50,12 @@ class GameRenderer:
                 else:
                     text_color = curses.color_pair(4) | curses.A_BOLD
 
-                stdscr.addstr(self.game.board.height // 2, 20+self.offset_x, "PAUZA!",text_color)
-                stdscr.addstr((self.game.board.height // 2) + 1, 20+self.offset_x, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
+                stdscr.addstr(self.offset_y, 20+self.offset_x, "PAUZA!",text_color)
+                stdscr.addstr(self.offset_y + 1, 20+self.offset_x, "PRO POKRAČOVÁNÍ ZMÁČKNI 'P'!", text_color)
 
 
     def display_next_block(self,stdscr):
-        text_color = self.display_colors()[0]
+        text_color = self._display_colors()[0]
         passive_coords = self.game.next_block.relative_blocks
         display_coords = []
         stdscr.addstr(7+self.offset_y, self.offset_x+20, "Následující kostka:",text_color)
@@ -62,20 +72,20 @@ class GameRenderer:
             stdscr.addstr(y+7,x,symbol,block_color)
 
     def display_highest_score(self,stdscr):
-        text_color, number_color = self.display_colors()
+        text_color, number_color = self._display_colors()
 
-        if self.game.top_ten_score:
+        if self.game.highest_score:
             stdscr.addstr(3, 3, "T O P  S K Ó R E:", text_color)
-            name = self.game.top_ten_score[0]
+            name = self.game.highest_score[0]
             len_name = len(name)
-            score = self.game.top_ten_score[1]
+            score = self.game.highest_score[1]
             stdscr.addstr(4, 3, f" {name}: ", text_color)
             stdscr.addstr(4, 4 + len_name, f"  {score}", number_color)
 
 
 
     def display_top_ten(self,stdscr):
-        text_color, number_color = self.display_colors()
+        text_color, number_color = self._display_colors()
         top_ten = self.game.top_ten_score
         score = self.game.score_manager.score
         max_player = len(top_ten)
@@ -104,22 +114,11 @@ class GameRenderer:
 
                 # VYKRESLENÍ
                 if player_one:
-                    p1 = player_one[0]
-                    p1_score = str(player_one[1])
-                    stdscr.addstr(19, 3, f"{rank_one}. {p1} : ", text_color)
-                    stdscr.addstr(19, 4 + 8, p1_score, number_color)
+                    self._display_ladder_player_score(stdscr, player_one[0], str(player_one[1]), rank_one, 3, 19)
                 if player_two:
-                    p2 = player_two[0]
-                    p2_score = str(player_two[1])
-                    stdscr.addstr(21, 3, f"{rank_two}. {p2} : ", text_color)
-                    stdscr.addstr(21, 4 + 8, p2_score, number_color)
+                    self._display_ladder_player_score(stdscr, player_two[0], str(player_two[1]), rank_two, 3, 21)
 
-                your_score = "Tvé score:"
-                color = curses.color_pair(5)
-
-                number_of_your_score = self.game.score_manager.score
-                stdscr.addstr(23, 3, f"{your_score} ", color)
-                stdscr.addstr(23, 4 + len(your_score), str(number_of_your_score), number_color)
+                self._display_player_score(stdscr,score,3,23)
 
             elif my_position == 0:
                 #LOGIKA
@@ -130,21 +129,14 @@ class GameRenderer:
                     player_two = top_ten[2]
                     rank_two = 3
                 #VYKRESLENÍ
-                your_score = "Tvé score:"
-                color = curses.color_pair(5)
-                number_of_your_score = self.game.score_manager.score
-                stdscr.addstr(19, 3, f"{your_score} ", color)
-                stdscr.addstr(19, 4 + len(your_score), str(number_of_your_score), number_color)
+                self._display_player_score(stdscr, score, 3, 19)
+
                 if player_one:
-                    p1 = player_one[0]
-                    p1_score = str(player_one[1])
-                    stdscr.addstr(21, 3, f"{rank_one}. {p1} : ", text_color)
-                    stdscr.addstr(21, 4 + 8, p1_score, number_color)
+                    self._display_ladder_player_score(stdscr, player_one[0], str(player_one[1]), rank_one, 3, 21)
+
                 if player_two:
-                    p2 = player_two[0]
-                    p2_score = str(player_two[1])
-                    stdscr.addstr(23, 3, f"{rank_two}. {p2} : ", text_color)
-                    stdscr.addstr(23, 4 + 8, p2_score, number_color)
+                    self._display_ladder_player_score(stdscr, player_two[0], str(player_two[1]), rank_two, 3, 23)
+
 
             else:
                 #LOGIKA
@@ -154,28 +146,17 @@ class GameRenderer:
                 rank_two = my_position+2
                 #VYKRESLENÍ
                 if player_one:
-                    p1 = player_one[0]
-                    p1_score = str(player_one[1])
-                    stdscr.addstr(19, 3, f"{rank_one}. {p1} : ", text_color)
-                    stdscr.addstr(19, 4 + 8, p1_score, number_color)
-                your_score = "Tvé score:"
-                color = curses.color_pair(5)
-                number_of_your_score = self.game.score_manager.score
-                stdscr.addstr(21, 3, f"{your_score} ", color)
-                stdscr.addstr(21, 4 + len(your_score), str(number_of_your_score), number_color)
+                    self._display_ladder_player_score(stdscr, player_one[0], str(player_one[1]), rank_one, 3, 19)
+
+                self._display_player_score(stdscr, score, 3, 21)
 
                 if player_two:
-                    p2 = player_two[0]
-                    p2_score = str(player_two[1])
-                    stdscr.addstr(23, 3, f"{rank_two}. {p2} : ", text_color)
-                    stdscr.addstr(23, 4 + 8, p2_score, number_color)
+                    self._display_ladder_player_score(stdscr, player_two[0], str(player_two[1]), rank_two, 3, 23)
+
 
         else:
-            your_score = "Tvé score:"
-            color = curses.color_pair(5)
-            number_of_your_score = self.game.score_manager.score
-            stdscr.addstr(19, 3, f"{your_score} ", color)
-            stdscr.addstr(19, 4 + len(your_score), str(number_of_your_score), number_color)
+            self._display_player_score(stdscr, score, 3, 19)
+            
 
 
     def display(self,stdscr):
