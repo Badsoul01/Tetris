@@ -70,6 +70,9 @@ echo [2/4] Kontrola herních knihoven (pygame, curses)...
 echo [OK] Všechny knihovny jsou připraveny!
 echo.
 echo [3/4] Kontroluji dostupnost aktualizací...
+if not exist main.py (
+    echo [!] Soubory hry nebyly nalezeny. Zahajuji čistou instalaci...
+    goto :AKTUALIZUJ_HRU
 
 ::1. Stáhneme online verzi z GitHubu
 curl -L -o online_version.txt https://raw.githubusercontent.com/Badsoul01/Tetris/refs/heads/main/version.txt >nul 2>&1
