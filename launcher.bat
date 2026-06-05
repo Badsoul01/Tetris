@@ -16,7 +16,7 @@ python --version >nul 2>&1
 
 :: Zkontrolujeme, jeslti prikaz prosel (errorlevel 0) nebo selhal
 
-if %errorlevel% neg 0(
+if %errorlevel% neq 0 (
     echo [!] Systémový Python nebyl nalezen!
     echo Zahajuji záchrannou operaci...
     goto :STAHUJ_PYTHON
@@ -24,7 +24,7 @@ if %errorlevel% neg 0(
     echo [OK] Python je v systému nainstalován.
     set PYTHON_CMD=python
     goto :KONTROLA_KNIHOVEN
-
+)
 :: ---------------------------------------------------------
 :: ZÁCHRANNÁ OBLAST PRO STAHOVÁNÍ PYTHONU
 :: ---------------------------------------------------------
@@ -48,7 +48,7 @@ echo import site >> python_env\python311._pth
 echo [!] Stahuji instalátor pro správce balíčků (pip)...
 curl -L -o get-pip.py https://bootstrap.pypa.io/get-pip.py
 ::7. Spustíme instalaci pipu naším lokálním Pythonem
-echo[!] Instaluji pip do lokálního prostředí...
+echo [!] Instaluji pip do lokálního prostředí...
 python_env\python.exe get-pip.py --no-warn-script-location
 ::8. Uklidíme stažený script
 del get-pip.py
@@ -72,10 +72,10 @@ echo.
 echo [3/4] Kontroluji dostupnost aktualizací...
 
 ::1. Stáhneme online verzi z GitHubu
-curl -L -o online_version.txt https://raw.githubusercontent.com/TVOJE_JMENO/TVUJ_REPO/main/version.txt >nul 2>&1
+curl -L -o online_version.txt https://raw.githubusercontent.com/Badsoul01/Tetris/refs/heads/main/version.txt >nul 2>&1
 
 ::2. Provonáme lokální verzi hráče s online verzi
-fc version.txtt online_version.txt >nul
+fc version.txt online_version.txt >nul
 
 ::3. Pokud se soubory nerovnají, odbočímen a aktualizaci
 if %errorlevel% neq 0 (
@@ -94,6 +94,7 @@ echo ==================================================
 timeout /t 2 >nul
 :: zapínáme hru!
 %PYTHON_CMD% main.py
+exit
 
 :: ---------------------------------------------------------
 :: OBLAST PRO AKTUALIZACE HRY
@@ -102,7 +103,8 @@ timeout /t 2 >nul
 echo.
 echo [!] Byla nalezena nová verze hry! Aktualizuji...
 
-::1. curl -L -o update.zip https://github.com/TVOJE_JMENO/TVUJ_REPO/releases/latest/download/code.zip >nul 2>&1
+::1. Stáhneme z GitHubu Releases balíček s novým kodem...
+curl -L -o update.zip https://github.com/Badsoul01/Tetris/releases/latest/download/tetris.zip >nul 2>&1
 
 echo [!] Instaluji novou verzi...
 ::2. Rozbalíme nové soubory přímo přes ty staré
@@ -125,3 +127,4 @@ echo ==================================================
 timeout /t 2 >nul
 :: zapínáme hru!
 %PYTHON_CMD% main.py
+exit
