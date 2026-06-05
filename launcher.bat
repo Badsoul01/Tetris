@@ -65,7 +65,7 @@ goto :KONTROLA_KNIHOVEN
 echo.
 echo [2/4] Kontrola herních knihoven (pygame, curses)...
 
-:: Pomoci našeho Pythonu zavolame pip a nainstalujeme requiments.txt
+:: Pomoci našeho Pythonu zavolame pip a nainstalujeme requirements.txt
 %PYTHON_CMD% -m pip install -r requirements.txt  >nul 2>&1
 echo [OK] Všechny knihovny jsou připraveny!
 echo.
@@ -73,7 +73,7 @@ echo [3/4] Kontroluji dostupnost aktualizací...
 if not exist main.py (
     echo [!] Soubory hry nebyly nalezeny. Zahajuji čistou instalaci...
     goto :AKTUALIZUJ_HRU
-
+)
 ::1. Stáhneme online verzi z GitHubu
 curl -L -o online_version.txt https://raw.githubusercontent.com/Badsoul01/Tetris/refs/heads/main/version.txt >nul 2>&1
 
@@ -90,7 +90,7 @@ del online_version.txt
 echo [OK] Hra je aktualní!
 echo.
 ::---------------------------------------------------
-
+:SPUST_HRU
 echo [4/4] Hra se spouští...
 echo ==================================================
 :: Pauza 2vteřiny
@@ -105,13 +105,23 @@ exit
 :AKTUALIZUJ_HRU
 echo.
 echo [!] Byla nalezena nová verze hry! Aktualizuji...
+:: Pokud script skočil sem kvuli chybějícímu main.py, tak online-version neexistuje.
+:: Proto ho pro jistotu stáhneme, abychom věděli číslo verze.
+if not exist online_version.txt (
+    curl -L -o online_version.txt https://raw.githubusercontent.com/Badsoul01/Tetris/refs/heads/main/version.txt >nul 2>&1
+)
+:: Přečteme z online_version.txt přesné číslo verze do proměnné, abychom věděli, jaký ZIP stáhnout
+set /p LATEST_VERSION=<online_version.txt
 
+echo [!] Stahuji verzi %LATEST_VERSION%...
 ::1. Stáhneme z GitHubu Releases balíček s novým kodem...
-curl -L -o update.zip https://github.com/Badsoul01/Tetris/releases/latest/download/tetris.zip >nul 2>&1
+curl -L -o update.zip https://github.com/Badsoul01/Tetris/archive/refs/tags/%LATEST_VERSION%.zip >nul 2>&1
 
 echo [!] Instaluji novou verzi...
-::2. Rozbalíme nové soubory přímo přes ty staré
-tar -xf update.zip
+
+:: 2. Rozbalíme zip a pomocí --strip-components=1 zahodíme tu vrchní složku
+tar -xf update.zip --strip-components=1
+
 ::3. Smažeme stažený zip
 del update.zip
 
@@ -123,11 +133,4 @@ echo [OK] Aktualizace byla dokončena!
 echo.
 
 ::5. Spustíme hru.
-
-echo [4/4] Hra se spouští...
-echo ==================================================
-:: Pauza 2vteřiny
-timeout /t 2 >nul
-:: zapínáme hru!
-%PYTHON_CMD% main.py
-exit
+goto :SPUST_HRU
