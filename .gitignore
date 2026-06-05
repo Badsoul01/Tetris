@@ -1,0 +1,7 @@
+/logo.py
+/test.py
+.idea/
+__pycache__/
+savegame.json
+highscores.db
+.venv/
