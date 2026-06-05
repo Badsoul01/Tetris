@@ -17,7 +17,7 @@ class GameManager:
         self.state = "MENU"
         self.curses_colors = CURSES_COLORS
         pygame.mixer.init()
-        pygame.mixer.music.load("assets/tetris_theme.mp3")
+        pygame.mixer.music.load("music/tetris_theme.mp3")
         pygame.mixer.music.play(-1)
 
     def _save_data(self):
