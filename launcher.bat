@@ -14,14 +14,14 @@ echo [1/4] Kontrola instalace Pythonu...
 :: Pokus o zjištění verzi Pythonu
 python --version >nul 2>&1
 
-:: Zkontrolujeme, jeslti prikaz prosel (errorlevel 0) nebo selhal
+:: Zkontrolujeme, jestli prikaz prosel (errorlevel 0) nebo selhal
 
 if %errorlevel% neq 0 (
     :: před stažením zjistíme, zda máme lokální Python
-    if exist python_env.exe (
-    echo [OK] Nalezen lokální Python
-    set PYTHON_CMD=.\python_env\python.exe
-    goto :KONTROLA_KNIHOVEN
+    if exist python_env\python.exe (
+        echo [OK] Nalezen lokální Python
+        set PYTHON_CMD=.\python_env\python.exe
+        goto :KONTROLA_KNIHOVEN
     )
 
     echo [!] Systémový Python nebyl nalezen!
