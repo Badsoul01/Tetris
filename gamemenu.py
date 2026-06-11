@@ -14,7 +14,7 @@ class GameMenu:
         self.index_menu = 0
         self.menu_history = []
         self.current_screen = self.main_menu
-        self.settings = {"colors": True,
+        self.settings = {"colors": False,
                          "ghost_brick": False,
                          "music": True,
                          "starting_level": 1
