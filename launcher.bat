@@ -17,6 +17,13 @@ python --version >nul 2>&1
 :: Zkontrolujeme, jeslti prikaz prosel (errorlevel 0) nebo selhal
 
 if %errorlevel% neq 0 (
+    :: před stažením zjistíme, zda máme lokální Python
+    if exist python_env.exe (
+    echo [OK] Nalezen lokální Python
+    set PYTHON_CMD=.\python_env\python.exe
+    goto :KONTROLA_KNIHOVEN
+    )
+
     echo [!] Systémový Python nebyl nalezen!
     echo Zahajuji záchrannou operaci...
     goto :STAHUJ_PYTHON
