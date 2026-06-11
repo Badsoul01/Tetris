@@ -42,8 +42,10 @@ echo [!] Rozbaluji prostředí...
 tar -xf python_env.zip -C python_env
 :: 4. Smazeme puvodni stazeny zip
 del python_env.zip
-::5. odblokujeme import knihoven
+
+:: 5. Odblokujeme import knihoven a nasměrujeme Python na hru
 echo import site >> python_env\python311._pth
+echo .. >> python_env\python311._pth
 ::6. stahneme get-pip skript
 echo [!] Stahuji instalátor pro správce balíčků (pip)...
 curl -L -o get-pip.py https://bootstrap.pypa.io/get-pip.py
